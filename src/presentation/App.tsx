@@ -7,12 +7,14 @@ import { NewMembersPage } from "@/presentation/pages/members/NewMembersPage";
 import { NeedRenewalPage } from "@/presentation/pages/members/NeedRenewalPage";
 import { ExMembersPage } from "@/presentation/pages/members/ExMembersPage";
 import { SubscriptionPage } from "@/presentation/pages/subscriptions/SubscriptionPage";
+import { ReferralsPage } from "@/presentation/pages/membership/ReferralsPage";
+import { VisitorsPage } from "@/presentation/pages/membership/VisitorsPage";
+import { PerformancePage } from "@/presentation/pages/membership/PerformancePage";
 import { ImportExportPage } from "@/presentation/pages/integration/ImportExportPage";
 import { PaperIdPage } from "@/presentation/pages/integration/PaperIdPage";
 import { LarkPage } from "@/presentation/pages/integration/LarkPage";
 import { CitiesPage } from "@/presentation/pages/master-data/CitiesPage";
 import { ChaptersPage } from "@/presentation/pages/master-data/ChaptersPage";
-import { MembershipPlansPage } from "@/presentation/pages/master-data/MembershipPlansPage";
 
 export function App() {
   return (
@@ -32,13 +34,16 @@ export function App() {
 
         <Route path="/subscriptions" element={<SubscriptionPage />} />
 
+        <Route path="/membership/referrals" element={<ReferralsPage />} />
+        <Route path="/membership/visitors" element={<VisitorsPage />} />
+        <Route path="/membership/performance" element={<PerformancePage />} />
+
         <Route path="/integration/import" element={<ImportExportPage />} />
         <Route path="/integration/paper-id" element={<PaperIdPage />} />
         <Route path="/integration/lark" element={<LarkPage />} />
 
         <Route path="/master-data/cities" element={<CitiesPage />} />
         <Route path="/master-data/chapters" element={<ChaptersPage />} />
-        <Route path="/master-data/plans" element={<MembershipPlansPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

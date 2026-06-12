@@ -4,13 +4,15 @@ import type {
 } from "@/domain/repositories/MemberRepository";
 import type { Member, MemberStatus } from "@/domain/entities/Member";
 import { membersSeed } from "../data/members.data";
+import { memberStatsSeed } from "../data/memberStats.data";
 
 /** In-memory adapter for {@link MemberRepository}. Mutations persist per session. */
 export class InMemoryMemberRepository implements MemberRepository {
   private members: Member[];
 
   constructor(seed: Member[] = membersSeed) {
-    this.members = seed.map((m) => ({ ...m }));
+    // Merge the PALMS stored stats (1-2-1, CEU, attendance) into each member.
+    this.members = seed.map((m) => ({ ...m, ...(memberStatsSeed[m.id] ?? {}) }));
   }
 
   async getAll(): Promise<Member[]> {

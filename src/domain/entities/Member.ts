@@ -38,6 +38,13 @@ export interface Member {
   /** Member who invited/sponsored this member (FK -> Member). */
   sponsorId?: string;
   avatar?: string;
+  // PALMS performance stats that are not derivable from other data.
+  /** Recorded one-to-one meetings. */
+  oneToOnes?: number;
+  /** Continuing Education Units (training completed). */
+  ceu?: number;
+  /** Attendance percentage (0-100). */
+  attendancePercent?: number;
 }
 
 /** Renewal date = joinDate + durationMonths. Returns ISO yyyy-mm-dd. */

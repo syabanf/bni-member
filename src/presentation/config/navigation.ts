@@ -53,6 +53,9 @@ export const navigation: NavSection[] = [
         ],
       },
       { label: "Subscription Data", href: "/subscriptions", iconName: "FileText" },
+      { label: "Referral", href: "/membership/referrals", iconName: "Share2" },
+      { label: "Visitor", href: "/membership/visitors", iconName: "DoorOpen" },
+      { label: "Performa", href: "/membership/performance", iconName: "Trophy" },
     ],
   },
   {
@@ -60,7 +63,6 @@ export const navigation: NavSection[] = [
     items: [
       { label: "Kota", href: "/master-data/cities", iconName: "MapPin" },
       { label: "Chapter", href: "/master-data/chapters", iconName: "Building2" },
-      { label: "Membership Plan", href: "/master-data/plans", iconName: "Database" },
     ],
   },
   {

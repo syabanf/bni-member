@@ -13,8 +13,9 @@ interface MemberDetailModalProps {
 }
 
 export function MemberDetailModal({ memberId, onClose }: MemberDetailModalProps) {
-  const { getMemberDetail } = useServices();
+  const { getMemberDetail, getMemberPerformance } = useServices();
   const { data, loading } = useAsync(() => getMemberDetail.execute(memberId), [memberId]);
+  const { data: perf } = useAsync(() => getMemberPerformance.execute(memberId), [memberId]);
 
   return (
     <Modal isOpen onClose={onClose} labelledBy="member-detail-title">
@@ -71,6 +72,44 @@ export function MemberDetailModal({ memberId, onClose }: MemberDetailModalProps)
                   <DetailField label="Biaya Membership / thn">{formatCurrency(data.member.membershipFee)}</DetailField>
                 </div>
               </div>
+
+              {perf && (
+                <div className="border-t border-gray-100 pt-4">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
+                    Performa (PALMS)
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="rounded-xl bg-gray-50 px-3 py-2.5 text-center">
+                      <p className="text-lg font-bold text-gray-900">{perf.referralsGiven}</p>
+                      <p className="text-[11px] text-gray-500">Ref. Given</p>
+                    </div>
+                    <div className="rounded-xl bg-gray-50 px-3 py-2.5 text-center">
+                      <p className="text-lg font-bold text-gray-900">{perf.referralsReceived}</p>
+                      <p className="text-[11px] text-gray-500">Ref. Received</p>
+                    </div>
+                    <div className="rounded-xl bg-gray-50 px-3 py-2.5 text-center">
+                      <p className="text-lg font-bold text-gray-900">{perf.oneToOnes}</p>
+                      <p className="text-[11px] text-gray-500">1-2-1</p>
+                    </div>
+                    <div className="rounded-xl bg-gray-50 px-3 py-2.5 text-center">
+                      <p className="text-lg font-bold text-gray-900">{perf.visitorsBrought}</p>
+                      <p className="text-[11px] text-gray-500">Visitor</p>
+                    </div>
+                    <div className="rounded-xl bg-gray-50 px-3 py-2.5 text-center">
+                      <p className="text-lg font-bold text-gray-900">{perf.ceu}</p>
+                      <p className="text-[11px] text-gray-500">CEU</p>
+                    </div>
+                    <div className="rounded-xl bg-gray-50 px-3 py-2.5 text-center">
+                      <p className="text-lg font-bold text-gray-900">{perf.attendancePercent}%</p>
+                      <p className="text-[11px] text-gray-500">Kehadiran</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 rounded-xl bg-success/5 border border-success/20 px-4 py-3">
+                    <p className="text-xs text-gray-500">TYFCB (closed business)</p>
+                    <p className="text-lg font-bold text-success">{formatCurrency(perf.tyfcb)}</p>
+                  </div>
+                </div>
+              )}
 
               <div className="border-t border-gray-100 pt-4">
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Referral</p>
