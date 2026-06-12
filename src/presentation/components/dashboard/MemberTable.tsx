@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Eye, Pencil, Trash2, ArrowUpRight } from "lucide-react";
 import type { PaymentRecord } from "@/domain/entities/Payment";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
@@ -11,9 +12,15 @@ import { formatDate, SHORT_DATE } from "@/presentation/utils/format";
 interface MemberTableProps {
   data: PaymentRecord[];
   title?: string;
+  /** When set, renders a "Lihat semua" drill-down link in the header. */
+  viewAllTo?: string;
 }
 
-export function MemberTable({ data, title = "Recent Member Activity" }: MemberTableProps) {
+export function MemberTable({
+  data,
+  title = "Recent Member Activity",
+  viewAllTo,
+}: MemberTableProps) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<PaymentRecord | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -80,7 +87,18 @@ export function MemberTable({ data, title = "Recent Member Activity" }: MemberTa
         emptyText="No data found"
         header={
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+              {viewAllTo && (
+                <Link
+                  to={viewAllTo}
+                  className="inline-flex items-center gap-0.5 text-sm font-medium text-bni-primary hover:underline"
+                >
+                  Lihat semua
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
+            </div>
             <SearchInput
               value={search}
               onChange={setSearch}

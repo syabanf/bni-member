@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Link } from "react-router-dom";
+import { TrendingUp, TrendingDown, Minus, ArrowUpRight } from "lucide-react";
 import { getIcon, type IconName } from "@/presentation/config/icon-map";
 
 type StatColor = "red" | "amber" | "blue" | "green";
@@ -11,6 +12,8 @@ interface StatCardProps {
   trend?: string;
   trendDirection?: TrendDirection;
   color?: StatColor;
+  /** When set, the card becomes a clickable drill-down link to this route. */
+  to?: string;
 }
 
 const chipClasses: Record<StatColor, string> = {
@@ -33,13 +36,14 @@ export function StatCard({
   trend,
   trendDirection = "neutral",
   color = "red",
+  to,
 }: StatCardProps) {
   const Icon = getIcon(iconName);
   const TrendIcon =
     trendDirection === "up" ? TrendingUp : trendDirection === "down" ? TrendingDown : Minus;
 
-  return (
-    <div className="bg-white rounded-2xl p-5 shadow-card border border-gray-100/80 transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5">
+  const body = (
+    <>
       <div className="flex items-start justify-between">
         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${chipClasses[color]}`}>
           <Icon className="w-6 h-6" />
@@ -54,8 +58,28 @@ export function StatCard({
 
       <div className="mt-4">
         <p className="text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
-        <p className="text-sm text-gray-500 mt-1">{label}</p>
+        <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
+          {label}
+          {to && (
+            <ArrowUpRight className="w-3.5 h-3.5 text-gray-300 transition-all group-hover:text-bni-primary group-hover:translate-x-0.5" />
+          )}
+        </p>
       </div>
-    </div>
+    </>
   );
+
+  const base = "bg-white rounded-2xl p-5 shadow-card border border-gray-100/80";
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className={`group block ${base} transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 hover:border-bni-primary/30`}
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return <div className={base}>{body}</div>;
 }
