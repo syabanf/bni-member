@@ -10,11 +10,16 @@ export interface MemberFilter {
 }
 
 /**
- * Port (interface) for member persistence. The presentation layer depends on
- * this abstraction; concrete adapters live in the infrastructure layer.
+ * Port (interface) for member persistence with full CRUD plus the queries the
+ * app needs (by status, by chapter, free-text).
  */
 export interface MemberRepository {
   getAll(): Promise<Member[]>;
+  getById(id: string): Promise<Member | null>;
+  getByChapter(chapterId: string): Promise<Member[]>;
   findByStatus(statuses: MemberStatus[]): Promise<Member[]>;
   query(filter: MemberFilter): Promise<Member[]>;
+  create(input: Omit<Member, "id">): Promise<Member>;
+  update(id: string, input: Omit<Member, "id">): Promise<Member>;
+  delete(id: string): Promise<void>;
 }

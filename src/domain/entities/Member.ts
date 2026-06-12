@@ -1,18 +1,51 @@
 /**
- * Domain entity: a BNI member.
- * Pure data + types — no framework dependencies.
+ * Domain entity: a BNI member. Belongs to one chapter, holds a unique
+ * professional classification within that chapter, and may have been invited
+ * (sponsored / referred) by another member.
  */
 export type MemberStatus = "Active" | "Pending" | "Overdue" | "Expired";
 
 export type SubscriptionTier = "Basic" | "Premium";
 
+export type MemberRole =
+  | "President"
+  | "Vice President"
+  | "Secretary/Treasurer"
+  | "Member";
+
+/** Standard BNI membership terms, in months. */
+export const MEMBERSHIP_DURATIONS = [12, 24, 60] as const;
+
 export interface Member {
   id: string;
   name: string;
   email: string;
+  /** Denormalised chapter name (for display); source of truth is chapterId. */
   chapter: string;
-  joinDate: string;
+  chapterId: string; // FK -> Chapter
+  /** Profession; unique within a chapter (BNI "one seat per profession" rule). */
+  classification: string;
+  role: MemberRole;
   status: MemberStatus;
   subscription: SubscriptionTier | string;
+  joinDate: string;
+  /** Membership term in months (12 / 24 / 60). */
+  durationMonths: number;
+  /** One-time registration / application fee. */
+  registrationFee: number;
+  /** Recurring (annual) membership fee. */
+  membershipFee: number;
+  /** Member who invited/sponsored this member (FK -> Member). */
+  sponsorId?: string;
   avatar?: string;
+}
+
+/** Renewal date = joinDate + durationMonths. Returns ISO yyyy-mm-dd. */
+export function memberRenewalDate(
+  member: Pick<Member, "joinDate" | "durationMonths">,
+): string | null {
+  if (!member.durationMonths) return null;
+  const d = new Date(member.joinDate);
+  d.setMonth(d.getMonth() + member.durationMonths);
+  return d.toISOString().slice(0, 10);
 }

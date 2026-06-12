@@ -1,15 +1,7 @@
 /**
- * Domain entities for the Master Data settings screen.
+ * Membership plan / tier reference data shown on the Master Data screen.
+ * (Cities and chapters are now first-class entities — see City.ts / Chapter.ts.)
  */
-export interface Chapter {
-  id: string;
-  name: string;
-  code: string;
-  region: string;
-  members: number;
-  status: string;
-}
-
 export interface SubscriptionPlanInfo {
   id: string;
   name: string;
@@ -19,16 +11,6 @@ export interface SubscriptionPlanInfo {
   status: string;
 }
 
-export interface Region {
-  id: string;
-  name: string;
-  code: string;
-  chapters: number;
-  members: number;
-}
-
 export interface MasterData {
-  chapters: Chapter[];
   plans: SubscriptionPlanInfo[];
-  regions: Region[];
 }

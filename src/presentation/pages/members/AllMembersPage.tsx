@@ -1,35 +1,82 @@
 import { useState } from "react";
 import { Plus, Download, Search } from "lucide-react";
-import type { MemberStatus } from "@/domain/entities/Member";
+import type { Member, MemberStatus } from "@/domain/entities/Member";
 import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHeader } from "@/presentation/components/ui/PageHeader";
 import { MembersTable } from "@/presentation/components/members/MembersTable";
+import { MemberFormModal } from "@/presentation/components/members/MemberFormModal";
+import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
+import { MemberDetailModal } from "@/presentation/components/members/MemberDetailModal";
 
 const CHAPTERS = ["All", "Grow", "Rise", "Amplify", "Glorify", "Magnify", "Garuda"];
 const STATUSES: (MemberStatus | "All")[] = ["All", "Active", "Pending", "Overdue", "Expired"];
 
 export function AllMembersPage() {
-  const { getMembers } = useServices();
+  const { getMembers, listChapters, saveMember, deleteMember } = useServices();
+
   const [search, setSearch] = useState("");
   const [chapter, setChapter] = useState("All");
   const [status, setStatus] = useState<MemberStatus | "All">("All");
+  const [refresh, setRefresh] = useState(0);
+  const bump = () => setRefresh((r) => r + 1);
 
   const { data: members } = useAsync(
     () => getMembers.execute({ search, chapter, status }),
-    [search, chapter, status],
+    [search, chapter, status, refresh],
   );
-  const { data: allMembers } = useAsync(() => getMembers.execute({}), []);
+  const { data: allMembers } = useAsync(() => getMembers.execute({}), [refresh]);
+  const { data: chapterStats } = useAsync(() => listChapters.execute(), [refresh]);
 
   const rows = members ?? [];
-  const total = allMembers?.length ?? rows.length;
+  const all = allMembers ?? [];
+  const total = all.length;
+  const sponsorName = new Map(all.map((m) => [m.id, m.name]));
+  const chapterOptions = (chapterStats ?? []).map((c) => ({
+    id: c.chapter.id,
+    name: c.chapter.name,
+  }));
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Member | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [detailMemberId, setDetailMemberId] = useState<string | null>(null);
+
+  const openCreate = () => {
+    setEditing(null);
+    setFormOpen(true);
+  };
+  const openEdit = (m: Member) => {
+    setEditing(m);
+    setFormOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteMember.execute(deleteTarget.id);
+      setDeleteTarget(null);
+      bump();
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : "Gagal menghapus");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="All Member"
         actions={
-          <button className="flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium">
+          <button
+            onClick={openCreate}
+            className="flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
             <Plus className="w-4 h-4" />
             Add New Member
           </button>
@@ -82,14 +129,32 @@ export function AllMembersPage() {
 
       <MembersTable
         members={rows}
-        extraColumns={[{ header: "Subscription", render: (m) => m.subscription }]}
-        renderActions={() => (
+        extraColumns={[
+          { header: "Classification", render: (m) => m.classification },
+          {
+            header: "Sponsor",
+            render: (m) => (m.sponsorId ? sponsorName.get(m.sponsorId) ?? "—" : "—"),
+          },
+        ]}
+        renderActions={(m) => (
           <div className="flex gap-2">
-            <button className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
+            <button
+              onClick={() => setDetailMemberId(m.id)}
+              className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
               View
             </button>
-            <button className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
+            <button
+              onClick={() => openEdit(m)}
+              className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
               Edit
+            </button>
+            <button
+              onClick={() => setDeleteTarget(m)}
+              className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-danger hover:bg-red-50"
+            >
+              Delete
             </button>
           </div>
         )}
@@ -104,10 +169,40 @@ export function AllMembersPage() {
             Previous
           </button>
           <button className="px-3 py-1 text-sm bg-bni-primary text-white rounded-lg">1</button>
-          <button className="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">2</button>
           <button className="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Next</button>
         </div>
       </div>
+
+      <MemberFormModal
+        isOpen={formOpen}
+        initial={editing}
+        chapters={chapterOptions}
+        members={all}
+        onClose={() => setFormOpen(false)}
+        onSubmit={async (input) => {
+          await saveMember.execute(input);
+          bump();
+        }}
+      />
+      <ConfirmDeleteModal
+        isOpen={!!deleteTarget}
+        title="Hapus Member"
+        message={`Yakin menghapus "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        error={deleteError}
+        deleting={deleting}
+        onCancel={() => {
+          setDeleteTarget(null);
+          setDeleteError(null);
+        }}
+        onConfirm={handleDelete}
+      />
+
+      {detailMemberId && (
+        <MemberDetailModal
+          memberId={detailMemberId}
+          onClose={() => setDetailMemberId(null)}
+        />
+      )}
     </div>
   );
 }
