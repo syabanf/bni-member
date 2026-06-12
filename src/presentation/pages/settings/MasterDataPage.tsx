@@ -2,10 +2,14 @@ import { useState } from "react";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import type { City } from "@/domain/entities/City";
 import type { Chapter } from "@/domain/entities/Chapter";
+import type { CityWithStats } from "@/application/dto/CityWithStats";
+import type { ChapterWithStats } from "@/application/dto/ChapterWithStats";
 import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHeader } from "@/presentation/components/ui/PageHeader";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
+import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
+import { IconButton } from "@/presentation/components/ui/IconButton";
 import { CityFormModal } from "@/presentation/components/master-data/CityFormModal";
 import { ChapterFormModal } from "@/presentation/components/master-data/ChapterFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
@@ -28,7 +32,6 @@ interface DeleteTarget {
 
 const primaryBtn =
   "flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium";
-const thClass = "px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase whitespace-nowrap";
 
 export function MasterDataPage() {
   const {
@@ -81,6 +84,104 @@ export function MasterDataPage() {
     }
   };
 
+  const cityColumns: Column<CityWithStats>[] = [
+    {
+      key: "name",
+      header: "Kota",
+      primary: true,
+      cell: ({ city }) => (
+        <div>
+          <p className="text-sm font-medium text-gray-900">{city.name}</p>
+          <p className="text-xs text-gray-500">
+            {city.code} · {city.province}
+          </p>
+        </div>
+      ),
+    },
+    { key: "chapters", header: "Chapter", cell: (c) => c.chapterCount },
+    { key: "members", header: "Member", cell: (c) => c.memberCount },
+    { key: "status", header: "Status", cell: ({ city }) => <StatusBadge status={city.status} /> },
+    {
+      key: "actions",
+      header: "Aksi",
+      actions: true,
+      cell: ({ city }) => (
+        <div className="flex items-center gap-1">
+          <IconButton label={`Detail ${city.name}`} onClick={() => setDetailCityId(city.id)}>
+            <Eye className="w-4 h-4" />
+          </IconButton>
+          <IconButton
+            label={`Edit ${city.name}`}
+            onClick={() => {
+              setEditingCity(city);
+              setCityModalOpen(true);
+            }}
+          >
+            <Pencil className="w-4 h-4" />
+          </IconButton>
+          <IconButton
+            label={`Hapus ${city.name}`}
+            tone="danger"
+            onClick={() => setDeleteTarget({ type: "city", id: city.id, name: city.name })}
+          >
+            <Trash2 className="w-4 h-4" />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
+
+  const chapterColumns: Column<ChapterWithStats>[] = [
+    {
+      key: "name",
+      header: "Chapter",
+      primary: true,
+      cell: ({ chapter, cityName }) => (
+        <div>
+          <p className="text-sm font-medium text-gray-900">{chapter.name}</p>
+          <p className="text-xs text-gray-500">
+            {chapter.code} · {cityName}
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: "meeting",
+      header: "Meeting",
+      cell: ({ chapter }) => `${chapter.meetingDay}, ${chapter.meetingTime}`,
+    },
+    { key: "members", header: "Member", cell: (c) => c.memberCount },
+    { key: "status", header: "Status", cell: ({ chapter }) => <StatusBadge status={chapter.status} /> },
+    {
+      key: "actions",
+      header: "Aksi",
+      actions: true,
+      cell: ({ chapter }) => (
+        <div className="flex items-center gap-1">
+          <IconButton label={`Detail ${chapter.name}`} onClick={() => setDetailChapterId(chapter.id)}>
+            <Eye className="w-4 h-4" />
+          </IconButton>
+          <IconButton
+            label={`Edit ${chapter.name}`}
+            onClick={() => {
+              setEditingChapter(chapter);
+              setChapterModalOpen(true);
+            }}
+          >
+            <Pencil className="w-4 h-4" />
+          </IconButton>
+          <IconButton
+            label={`Hapus ${chapter.name}`}
+            tone="danger"
+            onClick={() => setDeleteTarget({ type: "chapter", id: chapter.id, name: chapter.name })}
+          >
+            <Trash2 className="w-4 h-4" />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
+
   const headerAction =
     activeTab === "cities" ? (
       <button
@@ -126,145 +227,24 @@ export function MasterDataPage() {
         ))}
       </div>
 
-      {/* Cities */}
       {activeTab === "cities" && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                {["Kode", "Kota", "Provinsi", "Chapter", "Member", "Status", "Aksi"].map((h) => (
-                  <th key={h} className={thClass}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {cityList.map(({ city, chapterCount, memberCount }) => (
-                <tr key={city.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-5 py-4 text-sm font-medium text-gray-900">{city.code}</td>
-                  <td className="px-5 py-4 text-sm font-medium text-gray-900">{city.name}</td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{city.province}</td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{chapterCount}</td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{memberCount}</td>
-                  <td className="px-5 py-4">
-                    <StatusBadge status={city.status} />
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => setDetailCityId(city.id)}
-                        aria-label={`Detail ${city.name}`}
-                        className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingCity(city);
-                          setCityModalOpen(true);
-                        }}
-                        aria-label={`Edit ${city.name}`}
-                        className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() =>
-                          setDeleteTarget({ type: "city", id: city.id, name: city.name })
-                        }
-                        aria-label={`Hapus ${city.name}`}
-                        className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-danger"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {cityList.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-5 py-8 text-center text-gray-500">
-                    Belum ada kota
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={cityColumns}
+          rows={cityList}
+          rowKey={({ city }) => city.id}
+          emptyText="Belum ada kota"
+        />
       )}
 
-      {/* Chapters */}
       {activeTab === "chapters" && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                {["Kode", "Chapter", "Kota", "Meeting", "Member", "Status", "Aksi"].map((h) => (
-                  <th key={h} className={thClass}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {chapterList.map(({ chapter, cityName, memberCount }) => (
-                <tr key={chapter.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-5 py-4 text-sm font-medium text-gray-900">{chapter.code}</td>
-                  <td className="px-5 py-4 text-sm font-medium text-gray-900">{chapter.name}</td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{cityName}</td>
-                  <td className="px-5 py-4 text-sm text-gray-600 whitespace-nowrap">
-                    {chapter.meetingDay}, {chapter.meetingTime}
-                  </td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{memberCount}</td>
-                  <td className="px-5 py-4">
-                    <StatusBadge status={chapter.status} />
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => setDetailChapterId(chapter.id)}
-                        aria-label={`Detail ${chapter.name}`}
-                        className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingChapter(chapter);
-                          setChapterModalOpen(true);
-                        }}
-                        aria-label={`Edit ${chapter.name}`}
-                        className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() =>
-                          setDeleteTarget({ type: "chapter", id: chapter.id, name: chapter.name })
-                        }
-                        aria-label={`Hapus ${chapter.name}`}
-                        className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-danger"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {chapterList.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="px-5 py-8 text-center text-gray-500">
-                    Belum ada chapter
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={chapterColumns}
+          rows={chapterList}
+          rowKey={({ chapter }) => chapter.id}
+          emptyText="Belum ada chapter"
+        />
       )}
 
-      {/* Plans (read-only) */}
       {activeTab === "plans" && (
         <div className="space-y-4">
           {plans.map((plan) => (

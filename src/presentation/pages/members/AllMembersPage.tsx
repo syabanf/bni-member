@@ -1,16 +1,30 @@
 import { useState } from "react";
-import { Plus, Download, Search } from "lucide-react";
+import { Plus, Download } from "lucide-react";
 import type { Member, MemberStatus } from "@/domain/entities/Member";
 import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHeader } from "@/presentation/components/ui/PageHeader";
 import { MembersTable } from "@/presentation/components/members/MembersTable";
+import { FilterBar } from "@/presentation/components/ui/FilterBar";
+import { SearchInput } from "@/presentation/components/ui/SearchInput";
+import { FilterSelect, type FilterOption } from "@/presentation/components/ui/FilterSelect";
 import { MemberFormModal } from "@/presentation/components/members/MemberFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 import { MemberDetailModal } from "@/presentation/components/members/MemberDetailModal";
 
-const CHAPTERS = ["All", "Grow", "Rise", "Amplify", "Glorify", "Magnify", "Garuda"];
-const STATUSES: (MemberStatus | "All")[] = ["All", "Active", "Pending", "Overdue", "Expired"];
+const CHAPTER_OPTIONS: FilterOption[] = [
+  "All",
+  "Grow",
+  "Rise",
+  "Amplify",
+  "Glorify",
+  "Magnify",
+  "Garuda",
+].map((c) => ({ value: c, label: c }));
+
+const STATUS_OPTIONS: FilterOption[] = ["All", "Active", "Pending", "Overdue", "Expired"].map(
+  (s) => ({ value: s, label: s === "All" ? "All Status" : s }),
+);
 
 export function AllMembersPage() {
   const { getMembers, listChapters, saveMember, deleteMember } = useServices();
@@ -83,49 +97,31 @@ export function AllMembersPage() {
         }
       />
 
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              aria-label="Search members"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-bni-primary/20"
-            />
-          </div>
-          <select
-            value={chapter}
-            onChange={(e) => setChapter(e.target.value)}
-            aria-label="Filter by chapter"
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-bni-primary/20"
-          >
-            {CHAPTERS.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as MemberStatus | "All")}
-            aria-label="Filter by status"
-            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-bni-primary/20"
-          >
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s === "All" ? "All Status" : s}
-              </option>
-            ))}
-          </select>
-          <button className="flex items-center gap-2 border border-gray-200 px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
-        </div>
-      </div>
+      <FilterBar>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search by name or email..."
+          ariaLabel="Search members"
+          className="flex-1"
+        />
+        <FilterSelect
+          value={chapter}
+          onChange={setChapter}
+          ariaLabel="Filter by chapter"
+          options={CHAPTER_OPTIONS}
+        />
+        <FilterSelect
+          value={status}
+          onChange={(v) => setStatus(v as MemberStatus | "All")}
+          ariaLabel="Filter by status"
+          options={STATUS_OPTIONS}
+        />
+        <button className="flex items-center justify-center gap-2 border border-gray-200 px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+          <Download className="w-4 h-4" />
+          Export
+        </button>
+      </FilterBar>
 
       <MembersTable
         members={rows}

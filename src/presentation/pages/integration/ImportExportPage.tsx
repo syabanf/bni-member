@@ -1,16 +1,11 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import {
-  Download,
-  Upload,
-  FileSpreadsheet,
-  CheckCircle,
-  AlertCircle,
-  Eye,
-  Trash2,
-} from "lucide-react";
+import { Download, Upload, CheckCircle, AlertCircle, Eye, Trash2 } from "lucide-react";
+import type { ImportRecord } from "@/domain/entities/ImportRecord";
 import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHeader } from "@/presentation/components/ui/PageHeader";
+import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
+import { IconButton } from "@/presentation/components/ui/IconButton";
 
 const TEMPLATE_CSV = [
   "Name,Email,Chapter,Phone,Address",
@@ -46,15 +41,58 @@ export function ImportExportPage() {
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setIsUploading(true);
-    // Simulate upload + processing.
     setTimeout(() => {
       setIsUploading(false);
       setUploadStatus("success");
       setTimeout(() => setUploadStatus("idle"), 3000);
     }, 1500);
   };
+
+  const columns: Column<ImportRecord>[] = [
+    {
+      key: "name",
+      header: "Name",
+      primary: true,
+      cell: (d) => (
+        <div>
+          <p className="text-sm font-medium text-gray-900">{d.name}</p>
+          <p className="text-xs text-gray-500">{d.id}</p>
+        </div>
+      ),
+    },
+    { key: "email", header: "Email", cell: (d) => d.email },
+    { key: "chapter", header: "Chapter", cell: (d) => d.chapter },
+    {
+      key: "status",
+      header: "Status",
+      cell: (d) => (
+        <span
+          className={`px-2.5 py-1 text-xs rounded-full ${
+            d.status === "Success" ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
+          }`}
+        >
+          {d.status}
+        </span>
+      ),
+    },
+    { key: "renewal", header: "Tanggal Renewal", cell: (d) => d.renewalDate },
+    {
+      key: "actions",
+      header: "Actions",
+      actions: true,
+      cell: (d) => (
+        <div className="flex items-center gap-1">
+          <IconButton label={`View ${d.name}`}>
+            <Eye className="w-4 h-4" />
+          </IconButton>
+          <IconButton label={`Delete ${d.name}`} tone="danger">
+            <Trash2 className="w-4 h-4" />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -115,114 +153,20 @@ export function ImportExportPage() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-5 border-b border-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900">Review Data Import</h3>
-          <p className="text-sm text-gray-500 mt-1">Data yang baru saja diimport atau dalam proses.</p>
-        </div>
-
-        {/* Desktop table */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                {["ID Import", "Name", "Email", "Chapter", "Status", "Tanggal Renewal", "Actions"].map((h) => (
-                  <th key={h} className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {rows.map((data) => (
-                <tr key={data.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-5 py-4 text-sm font-medium text-gray-900">{data.id}</td>
-                  <td className="px-5 py-4 text-sm font-medium text-gray-900">{data.name}</td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{data.email}</td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{data.chapter}</td>
-                  <td className="px-5 py-4">
-                    <span
-                      className={`px-2.5 py-1 text-xs rounded-full ${
-                        data.status === "Success"
-                          ? "bg-success/10 text-success"
-                          : "bg-danger/10 text-danger"
-                      }`}
-                    >
-                      {data.status}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-sm text-gray-600">{data.renewalDate}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex gap-2">
-                      <button aria-label={`View ${data.name}`} className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button aria-label={`Delete ${data.name}`} className="p-2 text-danger hover:bg-red-50 rounded-lg">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile cards */}
-        <div className="md:hidden divide-y divide-gray-100">
-          {rows.map((data) => (
-            <div key={data.id} className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{data.name}</p>
-                  <p className="text-xs text-gray-500">{data.id}</p>
-                </div>
-                <span
-                  className={`px-2.5 py-1 text-xs rounded-full ${
-                    data.status === "Success"
-                      ? "bg-success/10 text-success"
-                      : "bg-danger/10 text-danger"
-                  }`}
-                >
-                  {data.status}
-                </span>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-xs text-gray-500 uppercase">Email</span>
-                  <span className="text-sm text-gray-900">{data.email}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-xs text-gray-500 uppercase">Chapter</span>
-                  <span className="text-sm text-gray-900">{data.chapter}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-xs text-gray-500 uppercase">Tanggal Renewal</span>
-                  <span className="text-sm text-gray-900">{data.renewalDate}</span>
-                </div>
-              </div>
-              <div className="flex gap-2 mt-4 pt-3 border-t border-gray-100">
-                <button className="flex-1 p-2 text-gray-600 hover:bg-gray-100 rounded-lg flex items-center justify-center gap-1">
-                  <Eye className="w-4 h-4" />
-                  <span className="text-xs">View</span>
-                </button>
-                <button className="flex-1 p-2 text-danger hover:bg-red-50 rounded-lg flex items-center justify-center gap-1">
-                  <Trash2 className="w-4 h-4" />
-                  <span className="text-xs">Delete</span>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {rows.length === 0 && (
-          <div className="p-8 text-center text-gray-500">
-            <FileSpreadsheet className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>Belum ada data import</p>
-            <p className="text-sm">Upload file Excel untuk melihat data disini</p>
+      <DataTable
+        columns={columns}
+        rows={rows}
+        rowKey={(d) => d.id}
+        emptyText="Belum ada data import"
+        header={
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Review Data Import</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Data yang baru saja diimport atau dalam proses.
+            </p>
           </div>
-        )}
-      </div>
+        }
+      />
     </div>
   );
 }
