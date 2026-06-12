@@ -15,18 +15,31 @@ body,
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   font-family: var(--font-sans);
-  color: #111827;
-  background-color: #f4f5f7;
-  background-image: radial-gradient(
-    1200px 600px at 100% 0%,
-    rgba(204, 0, 0, 0.04),
-    transparent 60%
-  );
+  /* Inter stylistic sets: single-story 'a' + nicer 'g' for a cleaner look. */
+  font-feature-settings: "cv11", "ss01";
+  color: #0f172a;
+  background-color: #f5f6f8;
+  background-image:
+    radial-gradient(900px 520px at 100% -5%, rgba(204, 0, 0, 0.05), transparent 55%),
+    radial-gradient(720px 520px at -10% 110%, rgba(59, 130, 246, 0.045), transparent 55%);
   background-attachment: fixed;
+}
+
+/* Crisp, aligned numerals in metrics and tables. */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keyboard focus polish (does not affect mouse clicks). */
+:where(a, button, [role="button"], [tabindex]):focus-visible {
+  outline: 2px solid rgba(204, 0, 0, 0.45);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
 }
 
 ::selection {

@@ -25,7 +25,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-lg border-b border-gray-200/70">
+    <header className="sticky top-0 z-30 bg-white/75 backdrop-blur-xl border-b border-gray-200/60 shadow-soft">
       <div className="h-16 flex items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-3">
           <button
@@ -41,7 +41,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
-          <div className="hidden md:flex items-center bg-gray-100/80 rounded-xl px-3 py-2 transition-colors focus-within:bg-white focus-within:ring-2 focus-within:ring-bni-primary/20">
+          <div className="hidden md:flex items-center bg-gray-100/80 rounded-full px-4 py-2 transition-all focus-within:bg-white focus-within:ring-2 focus-within:ring-bni-primary/25 focus-within:shadow-soft">
             <Search className="w-4 h-4 text-gray-400" />
             <input
               type="text"
@@ -70,7 +70,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                 <p className="text-sm font-medium text-gray-900">{user?.name ?? "—"}</p>
                 <p className="text-xs text-gray-500">{roleLabel}</p>
               </div>
-              <div className="w-9 h-9 rounded-lg bg-bni-primary flex items-center justify-center text-white text-sm font-semibold">
+              <div className="w-9 h-9 rounded-lg bg-brand-gradient flex items-center justify-center text-white text-sm font-semibold shadow-glow">
                 {user?.name.charAt(0) ?? "?"}
               </div>
               <ChevronDown className="w-4 h-4 text-gray-400 hidden md:block" />

@@ -17,10 +17,18 @@ interface StatCardProps {
 }
 
 const chipClasses: Record<StatColor, string> = {
-  red: "bg-gradient-to-br from-bni-primary/15 to-bni-primary/5 text-bni-primary",
-  amber: "bg-gradient-to-br from-warning/15 to-warning/5 text-warning",
-  blue: "bg-gradient-to-br from-blue-500/15 to-blue-500/5 text-blue-500",
-  green: "bg-gradient-to-br from-success/15 to-success/5 text-success",
+  red: "bg-gradient-to-br from-bni-primary/15 to-bni-primary/5 text-bni-primary ring-1 ring-bni-primary/10",
+  amber: "bg-gradient-to-br from-warning/15 to-warning/5 text-warning ring-1 ring-warning/10",
+  blue: "bg-gradient-to-br from-blue-500/15 to-blue-500/5 text-blue-500 ring-1 ring-blue-500/10",
+  green: "bg-gradient-to-br from-success/15 to-success/5 text-success ring-1 ring-success/10",
+};
+
+/** Soft decorative glow in the card corner, tinted to the stat colour. */
+const glowClasses: Record<StatColor, string> = {
+  red: "bg-bni-primary/10",
+  amber: "bg-warning/10",
+  blue: "bg-blue-500/10",
+  green: "bg-success/10",
 };
 
 const trendPill: Record<TrendDirection, string> = {
@@ -44,7 +52,11 @@ export function StatCard({
 
   const body = (
     <>
-      <div className="flex items-start justify-between">
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl ${glowClasses[color]}`}
+      />
+      <div className="relative flex items-start justify-between">
         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${chipClasses[color]}`}>
           <Icon className="w-6 h-6" />
         </div>
@@ -56,8 +68,8 @@ export function StatCard({
         )}
       </div>
 
-      <div className="mt-4">
-        <p className="text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
+      <div className="relative mt-4">
+        <p className="text-3xl font-bold text-gray-900 tracking-tight tabular-nums">{value}</p>
         <p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
           {label}
           {to && (
@@ -68,7 +80,7 @@ export function StatCard({
     </>
   );
 
-  const base = "bg-white rounded-2xl p-5 shadow-card border border-gray-100/80";
+  const base = "relative overflow-hidden bg-white rounded-2xl p-5 shadow-card border border-gray-100/80";
 
   if (to) {
     return (

@@ -71,9 +71,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     key={sub.href}
                     to={sub.href}
                     onClick={onClose}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors duration-150 ${
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
                       active
-                        ? "bg-bni-light text-bni-primary font-medium"
+                        ? "bg-bni-light text-bni-primary font-semibold ring-1 ring-bni-primary/10"
                         : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                     }`}
                   >
@@ -101,16 +101,20 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         key={item.label}
         to={item.href ?? "#"}
         onClick={onClose}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150 ${
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
           active
-            ? "bg-bni-light text-bni-primary font-medium"
-            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            ? "bg-brand-gradient text-white font-semibold shadow-glow"
+            : "text-gray-600 hover:bg-gray-100/70 hover:text-gray-900"
         }`}
       >
         <Icon className="w-5 h-5" />
         <span className="text-sm font-medium">{item.label}</span>
         {item.badge && (
-          <span className="bg-bni-primary text-white text-xs px-2 py-0.5 rounded-full ml-auto">
+          <span
+            className={`text-xs px-2 py-0.5 rounded-full ml-auto ${
+              active ? "bg-white/25 text-white" : "bg-bni-primary text-white"
+            }`}
+          >
             {item.badge}
           </span>
         )}
@@ -138,7 +142,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         }`}
       >
         <div className="flex items-start gap-3 px-5 py-4 border-b border-gray-100 shrink-0">
-          <div className="w-10 h-10 rounded-xl bg-bni-primary flex items-center justify-center text-white text-lg font-bold shadow-glow">
+          <div className="w-10 h-10 rounded-xl bg-brand-gradient flex items-center justify-center text-white text-lg font-bold shadow-glow">
             B
           </div>
           <div className="leading-tight">
@@ -172,7 +176,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
         <div className="shrink-0 p-3 border-t border-gray-100">
           <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors">
-            <div className="w-9 h-9 rounded-full bg-bni-primary flex items-center justify-center text-white font-medium">
+            <div className="w-9 h-9 rounded-full bg-brand-gradient flex items-center justify-center text-white font-medium">
               {user?.name.charAt(0) ?? "?"}
             </div>
             <div className="leading-tight min-w-0">
