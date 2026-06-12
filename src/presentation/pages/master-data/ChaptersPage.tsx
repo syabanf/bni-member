@@ -6,6 +6,9 @@ import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHero } from "@/presentation/components/ui/PageHero";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
+import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
+import { FilterBar } from "@/presentation/components/ui/FilterBar";
+import { SearchInput } from "@/presentation/components/ui/SearchInput";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { IconButton } from "@/presentation/components/ui/IconButton";
 import { ChapterFormModal } from "@/presentation/components/master-data/ChapterFormModal";
@@ -26,6 +29,14 @@ export function ChaptersPage() {
   const { data: cityStats } = useAsync(() => listCities.execute(), [refresh]);
   const rows = data ?? [];
   const cityEntities = (cityStats ?? []).map((c) => c.city);
+  const [search, setSearch] = useState("");
+  const q = search.toLowerCase();
+  const filtered = rows.filter(
+    ({ chapter, cityName }) =>
+      chapter.name.toLowerCase().includes(q) ||
+      chapter.code.toLowerCase().includes(q) ||
+      cityName.toLowerCase().includes(q),
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Chapter | null>(null);
@@ -126,9 +137,27 @@ export function ChaptersPage() {
         }
       />
 
+      <SummaryCards
+        items={[
+          { iconName: "Building2", value: rows.length, label: "Total Chapter", color: "blue" },
+          { iconName: "UserCheck", value: rows.filter((c) => c.chapter.status === "Active").length, label: "Active", color: "green" },
+          { iconName: "Users", value: rows.reduce((s, c) => s + c.memberCount, 0), label: "Total Member", color: "amber" },
+        ]}
+      />
+
+      <FilterBar>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Cari chapter / kode / kota..."
+          ariaLabel="Cari chapter"
+          className="flex-1"
+        />
+      </FilterBar>
+
       <DataTable
         columns={columns}
-        rows={rows}
+        rows={filtered}
         rowKey={({ chapter }) => chapter.id}
         emptyText="Belum ada chapter"
       />

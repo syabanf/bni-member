@@ -4,6 +4,7 @@ import type { Member, MemberStatus } from "@/domain/entities/Member";
 import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHeader } from "@/presentation/components/ui/PageHeader";
+import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
 import { MembersTable } from "@/presentation/components/members/MembersTable";
 import { FilterBar } from "@/presentation/components/ui/FilterBar";
 import { SearchInput } from "@/presentation/components/ui/SearchInput";
@@ -95,6 +96,15 @@ export function AllMembersPage() {
             Add New Member
           </button>
         }
+      />
+
+      <SummaryCards
+        items={[
+          { iconName: "Users", value: total, label: "Total Member", color: "blue" },
+          { iconName: "UserCheck", value: all.filter((m) => m.status === "Active").length, label: "Active", color: "green" },
+          { iconName: "Clock", value: all.filter((m) => m.status === "Pending").length, label: "Pending", color: "amber" },
+          { iconName: "AlertTriangle", value: all.filter((m) => m.status === "Overdue").length, label: "Overdue", color: "red" },
+        ]}
       />
 
       <FilterBar>

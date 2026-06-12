@@ -8,6 +8,9 @@ import { PageHero } from "@/presentation/components/ui/PageHero";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { IconButton } from "@/presentation/components/ui/IconButton";
+import { FilterBar } from "@/presentation/components/ui/FilterBar";
+import { SearchInput } from "@/presentation/components/ui/SearchInput";
+import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { VisitorFormModal } from "@/presentation/components/membership/VisitorFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 import { formatDate } from "@/presentation/utils/format";
@@ -41,6 +44,16 @@ export function VisitorsPage() {
     stage,
     count: rows.filter((r) => r.visitor.status === stage).length,
   }));
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const ql = search.toLowerCase();
+  const filtered = rows.filter(
+    (r) =>
+      (statusFilter === "All" || r.visitor.status === statusFilter) &&
+      (r.visitor.name.toLowerCase().includes(ql) ||
+        r.visitor.profession.toLowerCase().includes(ql)),
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Visitor | null>(null);
@@ -140,7 +153,23 @@ export function VisitorsPage() {
         ))}
       </div>
 
-      <DataTable columns={columns} rows={rows} rowKey={({ visitor }) => visitor.id} emptyText="Belum ada visitor" />
+      <FilterBar>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Cari nama / profesi..."
+          ariaLabel="Cari visitor"
+          className="flex-1"
+        />
+        <FilterSelect
+          value={statusFilter}
+          onChange={setStatusFilter}
+          ariaLabel="Filter status visitor"
+          options={[{ value: "All", label: "Semua Status" }, ...VISITOR_STAGES.map((s) => ({ value: s, label: s }))]}
+        />
+      </FilterBar>
+
+      <DataTable columns={columns} rows={filtered} rowKey={({ visitor }) => visitor.id} emptyText="Belum ada visitor" />
 
       <VisitorFormModal
         isOpen={modalOpen}

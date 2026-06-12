@@ -9,6 +9,9 @@ import { StatCard } from "@/presentation/components/ui/StatCard";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { IconButton } from "@/presentation/components/ui/IconButton";
+import { FilterBar } from "@/presentation/components/ui/FilterBar";
+import { SearchInput } from "@/presentation/components/ui/SearchInput";
+import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { ReferralFormModal } from "@/presentation/components/membership/ReferralFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 import { formatCurrency, formatDate } from "@/presentation/utils/format";
@@ -30,6 +33,17 @@ export function ReferralsPage() {
 
   const closed = rows.filter((r) => r.referral.status === "Closed");
   const tyfcbTotal = closed.reduce((s, r) => s + r.referral.tyfcb, 0);
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const ql = search.toLowerCase();
+  const filtered = rows.filter(
+    (r) =>
+      (statusFilter === "All" || r.referral.status === statusFilter) &&
+      (r.referral.description.toLowerCase().includes(ql) ||
+        r.fromName.toLowerCase().includes(ql) ||
+        r.toName.toLowerCase().includes(ql)),
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Referral | null>(null);
@@ -137,7 +151,29 @@ export function ReferralsPage() {
         <StatCard iconName="CreditCard" value={formatCurrency(tyfcbTotal)} label="Total TYFCB (Closed)" color="red" />
       </div>
 
-      <DataTable columns={columns} rows={rows} rowKey={({ referral }) => referral.id} emptyText="Belum ada referral" />
+      <FilterBar>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Cari deskripsi / member..."
+          ariaLabel="Cari referral"
+          className="flex-1"
+        />
+        <FilterSelect
+          value={statusFilter}
+          onChange={setStatusFilter}
+          ariaLabel="Filter status referral"
+          options={[
+            { value: "All", label: "Semua Status" },
+            { value: "Open", label: "Open" },
+            { value: "In Progress", label: "In Progress" },
+            { value: "Closed", label: "Closed" },
+            { value: "Cancelled", label: "Cancelled" },
+          ]}
+        />
+      </FilterBar>
+
+      <DataTable columns={columns} rows={filtered} rowKey={({ referral }) => referral.id} emptyText="Belum ada referral" />
 
       <ReferralFormModal
         isOpen={modalOpen}

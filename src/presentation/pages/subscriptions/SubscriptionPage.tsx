@@ -4,6 +4,7 @@ import type { Subscription } from "@/domain/entities/Subscription";
 import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHeader } from "@/presentation/components/ui/PageHeader";
+import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
 import { FilterBar } from "@/presentation/components/ui/FilterBar";
 import { SearchInput } from "@/presentation/components/ui/SearchInput";
@@ -15,7 +16,10 @@ export function SubscriptionPage() {
   const { getSubscriptions } = useServices();
   const [search, setSearch] = useState("");
   const { data } = useAsync(() => getSubscriptions.execute(search), [search]);
+  const { data: allSubs } = useAsync(() => getSubscriptions.execute(""), []);
   const rows = data ?? [];
+  const all = allSubs ?? [];
+  const totalValue = all.reduce((s, x) => s + x.amount, 0);
 
   const columns: Column<Subscription>[] = [
     {
@@ -66,6 +70,14 @@ export function SubscriptionPage() {
             New Subscription
           </button>
         }
+      />
+
+      <SummaryCards
+        items={[
+          { iconName: "FileText", value: all.length, label: "Total Subscription", color: "blue" },
+          { iconName: "UserCheck", value: all.filter((s) => s.status === "Active").length, label: "Active", color: "green" },
+          { iconName: "CreditCard", value: formatCurrency(totalValue), label: "Total Nilai", color: "red" },
+        ]}
       />
 
       <FilterBar>

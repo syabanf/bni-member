@@ -5,6 +5,9 @@ import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHero } from "@/presentation/components/ui/PageHero";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
+import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
+import { FilterBar } from "@/presentation/components/ui/FilterBar";
+import { SearchInput } from "@/presentation/components/ui/SearchInput";
 import { formatCurrency } from "@/presentation/utils/format";
 
 const ghostBtn =
@@ -27,7 +30,14 @@ export function PerformancePage() {
   const bump = () => setRefresh((r) => r + 1);
 
   const { data } = useAsync(() => getMembershipLeaderboard.execute(), [refresh]);
-  const rows: Ranked[] = (data ?? []).map((e, i) => ({ ...e, rank: i + 1 }));
+  const list = data ?? [];
+  const ranked: Ranked[] = list.map((e, i) => ({ ...e, rank: i + 1 }));
+  const [search, setSearch] = useState("");
+  const q = search.toLowerCase();
+  const rows = ranked.filter((e) => e.member.name.toLowerCase().includes(q));
+  const totalTyfcb = list.reduce((s, e) => s + e.tyfcb, 0);
+  const totalReferral = list.reduce((s, e) => s + e.referralsGiven, 0);
+  const totalVisitor = list.reduce((s, e) => s + e.visitorsBrought, 0);
 
   const columns: Column<Ranked>[] = [
     {
@@ -74,6 +84,24 @@ export function PerformancePage() {
           </button>
         }
       />
+
+      <SummaryCards
+        items={[
+          { iconName: "CreditCard", value: formatCurrency(totalTyfcb), label: "Total TYFCB", color: "green" },
+          { iconName: "Share2", value: totalReferral, label: "Total Referral", color: "blue" },
+          { iconName: "DoorOpen", value: totalVisitor, label: "Total Visitor", color: "amber" },
+        ]}
+      />
+
+      <FilterBar>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Cari member..."
+          ariaLabel="Cari member"
+          className="flex-1"
+        />
+      </FilterBar>
 
       <DataTable columns={columns} rows={rows} rowKey={(e) => e.member.id} emptyText="Belum ada data performa" />
     </div>

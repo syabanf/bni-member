@@ -6,6 +6,9 @@ import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHero } from "@/presentation/components/ui/PageHero";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
+import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
+import { FilterBar } from "@/presentation/components/ui/FilterBar";
+import { SearchInput } from "@/presentation/components/ui/SearchInput";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { IconButton } from "@/presentation/components/ui/IconButton";
 import { CityFormModal } from "@/presentation/components/master-data/CityFormModal";
@@ -23,6 +26,14 @@ export function CitiesPage() {
   const bump = () => setRefresh((r) => r + 1);
   const { data } = useAsync(() => listCities.execute(), [refresh]);
   const rows = data ?? [];
+  const [search, setSearch] = useState("");
+  const q = search.toLowerCase();
+  const filtered = rows.filter(
+    ({ city }) =>
+      city.name.toLowerCase().includes(q) ||
+      city.code.toLowerCase().includes(q) ||
+      city.province.toLowerCase().includes(q),
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<City | null>(null);
@@ -115,9 +126,27 @@ export function CitiesPage() {
         }
       />
 
+      <SummaryCards
+        items={[
+          { iconName: "MapPin", value: rows.length, label: "Total Kota", color: "blue" },
+          { iconName: "Building2", value: rows.reduce((s, c) => s + c.chapterCount, 0), label: "Total Chapter", color: "amber" },
+          { iconName: "Users", value: rows.reduce((s, c) => s + c.memberCount, 0), label: "Total Member", color: "green" },
+        ]}
+      />
+
+      <FilterBar>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Cari kota / kode / provinsi..."
+          ariaLabel="Cari kota"
+          className="flex-1"
+        />
+      </FilterBar>
+
       <DataTable
         columns={columns}
-        rows={rows}
+        rows={filtered}
         rowKey={({ city }) => city.id}
         emptyText="Belum ada kota"
       />
