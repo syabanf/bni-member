@@ -3,6 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { navigation, type NavItem } from "@/presentation/config/navigation";
 import { getIcon } from "@/presentation/config/icon-map";
+import { useAuth } from "@/presentation/auth/AuthProvider";
+import { isNationalAdmin } from "@/domain/entities/User";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,7 +13,10 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { pathname } = useLocation();
-  const allItems = navigation.flatMap((s) => s.items);
+  const { user } = useAuth();
+  const admin = isNationalAdmin(user);
+  const sections = navigation.filter((s) => !s.adminOnly || admin);
+  const allItems = sections.flatMap((s) => s.items);
 
   const [openMenus, setOpenMenus] = useState<string[]>(() =>
     allItems
@@ -113,6 +118,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     );
   };
 
+  const roleLabel = user
+    ? `${user.role}${user.chapterName ? ` · ${user.chapterName}` : ""}`
+    : "";
+
   return (
     <>
       {isOpen && (
@@ -149,7 +158,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-          {navigation.map((section, idx) => (
+          {sections.map((section, idx) => (
             <div key={section.title ?? `section-${idx}`} className="space-y-1">
               {section.title && (
                 <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
@@ -164,11 +173,11 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="shrink-0 p-3 border-t border-gray-100">
           <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors">
             <div className="w-9 h-9 rounded-full bg-bni-primary flex items-center justify-center text-white font-medium">
-              A
+              {user?.name.charAt(0) ?? "?"}
             </div>
-            <div className="leading-tight">
-              <p className="text-sm font-medium text-gray-900">Admin User</p>
-              <p className="text-xs text-gray-500">Administrator</p>
+            <div className="leading-tight min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">{user?.name ?? "—"}</p>
+              <p className="text-xs text-gray-500 truncate">{roleLabel}</p>
             </div>
           </div>
         </div>

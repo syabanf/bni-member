@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Search, Bell, ChevronDown, Menu, User, LogOut } from "lucide-react";
 import { getPageTitle } from "@/presentation/config/navigation";
+import { useAuth } from "@/presentation/auth/AuthProvider";
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -9,8 +10,19 @@ interface TopbarProps {
 
 export function Topbar({ onMenuClick }: TopbarProps) {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const title = getPageTitle(pathname);
+
+  const roleLabel = user
+    ? `${user.role}${user.chapterName ? ` · ${user.chapterName}` : ""}`
+    : "";
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-lg border-b border-gray-200/70">
@@ -55,11 +67,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
               className="flex items-center gap-2.5 p-1.5 md:pl-3 hover:bg-gray-100 rounded-xl"
             >
               <div className="hidden md:block text-right leading-tight">
-                <p className="text-sm font-medium text-gray-900">Admin User</p>
-                <p className="text-xs text-gray-500">Administrator</p>
+                <p className="text-sm font-medium text-gray-900">{user?.name ?? "—"}</p>
+                <p className="text-xs text-gray-500">{roleLabel}</p>
               </div>
               <div className="w-9 h-9 rounded-lg bg-bni-primary flex items-center justify-center text-white text-sm font-semibold">
-                A
+                {user?.name.charAt(0) ?? "?"}
               </div>
               <ChevronDown className="w-4 h-4 text-gray-400 hidden md:block" />
             </button>
@@ -71,17 +83,25 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                   aria-hidden="true"
                   onClick={() => setShowUserMenu(false)}
                 />
-                <div className="absolute right-0 mt-2 w-52 bg-white border border-gray-200/80 rounded-xl shadow-card-hover py-1.5 z-20">
+                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200/80 rounded-xl shadow-card-hover py-1.5 z-20">
                   <div className="px-4 py-2.5 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-900">Admin User</p>
-                    <p className="text-xs text-gray-500">admin@bni.id</p>
+                    <p className="text-sm font-medium text-gray-900">{user?.name ?? "—"}</p>
+                    <p className="text-xs text-gray-500">{user?.email ?? ""}</p>
+                    {roleLabel && (
+                      <span className="inline-block mt-1.5 text-[11px] px-2 py-0.5 rounded-full bg-bni-primary/10 text-bni-primary font-medium">
+                        {roleLabel}
+                      </span>
+                    )}
                   </div>
                   <button className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                     <User className="w-4 h-4 text-gray-400" />
                     Profile
                   </button>
-                  <button className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                    <LogOut className="w-4 h-4 text-gray-400" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-danger hover:bg-red-50"
+                  >
+                    <LogOut className="w-4 h-4" />
                     Logout
                   </button>
                 </div>

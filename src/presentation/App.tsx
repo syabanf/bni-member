@@ -1,4 +1,7 @@
+import type { ReactNode } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "@/presentation/auth/AuthProvider";
+import { LoginPage } from "@/presentation/pages/LoginPage";
 import { DashboardLayout } from "@/presentation/layouts/DashboardLayout";
 import { DashboardPage } from "@/presentation/pages/DashboardPage";
 import { PaymentCategoryPage } from "@/presentation/pages/payments/PaymentCategoryPage";
@@ -16,10 +19,22 @@ import { LarkPage } from "@/presentation/pages/integration/LarkPage";
 import { CitiesPage } from "@/presentation/pages/master-data/CitiesPage";
 import { ChaptersPage } from "@/presentation/pages/master-data/ChaptersPage";
 
+function RequireAuth({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  return user ? <>{children}</> : <Navigate to="/login" replace />;
+}
+
 export function App() {
   return (
     <Routes>
-      <Route element={<DashboardLayout />}>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        element={
+          <RequireAuth>
+            <DashboardLayout />
+          </RequireAuth>
+        }
+      >
         <Route path="/" element={<DashboardPage />} />
 
         <Route path="/payments/outstanding" element={<PaymentCategoryPage category="outstanding" />} />

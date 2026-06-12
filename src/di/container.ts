@@ -6,6 +6,7 @@ import { InMemoryCityRepository } from "@/infrastructure/repositories/InMemoryCi
 import { InMemoryChapterRepository } from "@/infrastructure/repositories/InMemoryChapterRepository";
 import { InMemoryReferralRepository } from "@/infrastructure/repositories/InMemoryReferralRepository";
 import { InMemoryVisitorRepository } from "@/infrastructure/repositories/InMemoryVisitorRepository";
+import { InMemoryAuthRepository } from "@/infrastructure/repositories/InMemoryAuthRepository";
 import { MockNotificationService } from "@/infrastructure/services/MockNotificationService";
 
 import { GetDashboardOverview } from "@/application/use-cases/GetDashboardOverview";
@@ -35,6 +36,7 @@ import { SaveVisitor } from "@/application/use-cases/SaveVisitor";
 import { DeleteVisitor } from "@/application/use-cases/DeleteVisitor";
 import { GetMemberPerformance } from "@/application/use-cases/GetMemberPerformance";
 import { GetMembershipLeaderboard } from "@/application/use-cases/GetMembershipLeaderboard";
+import { Login } from "@/application/use-cases/Login";
 
 /**
  * The set of use cases exposed to the presentation layer.
@@ -72,6 +74,8 @@ export interface Services {
   deleteVisitor: DeleteVisitor;
   getMemberPerformance: GetMemberPerformance;
   getMembershipLeaderboard: GetMembershipLeaderboard;
+  // Auth
+  login: Login;
 }
 
 /**
@@ -89,6 +93,7 @@ export function createServices(): Services {
   const chapterRepo = new InMemoryChapterRepository();
   const referralRepo = new InMemoryReferralRepository();
   const visitorRepo = new InMemoryVisitorRepository();
+  const authRepo = new InMemoryAuthRepository();
   const notificationService = new MockNotificationService();
 
   // Application (use cases) wired to the ports above
@@ -124,5 +129,7 @@ export function createServices(): Services {
     deleteVisitor: new DeleteVisitor(visitorRepo),
     getMemberPerformance: new GetMemberPerformance(memberRepo, referralRepo, visitorRepo),
     getMembershipLeaderboard: new GetMembershipLeaderboard(memberRepo, referralRepo, visitorRepo),
+
+    login: new Login(authRepo),
   };
 }

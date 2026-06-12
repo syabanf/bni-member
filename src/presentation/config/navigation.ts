@@ -18,6 +18,8 @@ export interface NavItem {
 export interface NavSection {
   title?: string;
   items: NavItem[];
+  /** Only visible to National Admin. */
+  adminOnly?: boolean;
 }
 
 export const navigation: NavSection[] = [
@@ -60,6 +62,7 @@ export const navigation: NavSection[] = [
   },
   {
     title: "Master Data",
+    adminOnly: true,
     items: [
       { label: "Kota", href: "/master-data/cities", iconName: "MapPin" },
       { label: "Chapter", href: "/master-data/chapters", iconName: "Building2" },
@@ -67,6 +70,7 @@ export const navigation: NavSection[] = [
   },
   {
     title: "Integrasi",
+    adminOnly: true,
     items: [
       {
         label: "Data Integration",
