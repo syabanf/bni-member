@@ -12,6 +12,8 @@ const statusConfig: Record<string, { bg: string; text: string; label: string }> 
   Paid: { bg: "bg-success/10", text: "text-success", label: "Paid" },
   Outstanding: { bg: "bg-bni-primary/10", text: "text-bni-primary", label: "Outstanding" },
   Awaiting: { bg: "bg-warning/10", text: "text-warning", label: "Awaiting" },
+  Forming: { bg: "bg-blue-500/10", text: "text-blue-500", label: "Forming" },
+  Inactive: { bg: "bg-gray-100", text: "text-gray-500", label: "Inactive" },
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {
@@ -20,8 +22,9 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
     >
+      <span className="w-1.5 h-1.5 rounded-full bg-current" />
       {config.label}
     </span>
   );

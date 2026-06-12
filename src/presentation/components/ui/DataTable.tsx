@@ -40,7 +40,7 @@ export function DataTable<T>({
   const fieldCols = columns.filter((c) => !c.primary && !c.actions);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-card border border-gray-100/80 overflow-hidden">
       {header && <div className="p-5 border-b border-gray-100">{header}</div>}
 
       {rows.length === 0 ? (
@@ -50,7 +50,7 @@ export function DataTable<T>({
           {/* Desktop table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50/70">
                 <tr>
                   {columns.map((c) => (
                     <th
@@ -66,7 +66,7 @@ export function DataTable<T>({
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {rows.map((row) => (
-                  <tr key={rowKey(row)} className="hover:bg-gray-50 transition-colors">
+                  <tr key={rowKey(row)} className="hover:bg-gray-50/70 transition-colors">
                     {columns.map((c) => (
                       <td
                         key={c.key}

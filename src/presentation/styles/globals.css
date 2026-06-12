@@ -12,26 +12,44 @@ body,
   height: 100%;
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   font-family: var(--font-sans);
-  background-color: #f5f5f5;
   color: #111827;
+  background-color: #f4f5f7;
+  background-image: radial-gradient(
+    1200px 600px at 100% 0%,
+    rgba(204, 0, 0, 0.04),
+    transparent 60%
+  );
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgba(204, 0, 0, 0.15);
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
+  background: #d4d4d8;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: #a1a1aa;
+  background-clip: padding-box;
 }
 
 /* Modal entrance animation */

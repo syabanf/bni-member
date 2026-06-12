@@ -9,7 +9,7 @@ export function DashboardLayout() {
   return (
     <div className="flex min-h-screen">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="flex-1 md:ml-60">
+      <div className="flex-1 md:ml-64">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />
         <main className="p-4 md:p-6">
           <Outlet />
