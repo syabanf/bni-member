@@ -5,14 +5,20 @@ import type {
 import type { Member, MemberStatus } from "@/domain/entities/Member";
 import { membersSeed } from "../data/members.data";
 import { memberStatsSeed } from "../data/memberStats.data";
+import { packageNameForDuration } from "@/domain/entities/MembershipPackage";
 
 /** In-memory adapter for {@link MemberRepository}. Mutations persist per session. */
 export class InMemoryMemberRepository implements MemberRepository {
   private members: Member[];
 
-  constructor(seed: Member[] = membersSeed) {
-    // Merge the PALMS stored stats (1-2-1, CEU, attendance) into each member.
-    this.members = seed.map((m) => ({ ...m, ...(memberStatsSeed[m.id] ?? {}) }));
+  constructor(seed: Omit<Member, "subscription">[] = membersSeed) {
+    // Merge the PALMS stored stats and derive the membership package (term)
+    // from each member's duration.
+    this.members = seed.map((m) => ({
+      ...m,
+      ...(memberStatsSeed[m.id] ?? {}),
+      subscription: packageNameForDuration(m.durationMonths),
+    }));
   }
 
   async getAll(): Promise<Member[]> {

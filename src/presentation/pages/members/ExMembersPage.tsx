@@ -24,8 +24,8 @@ export function ExMembersPage() {
       <SummaryCards
         items={[
           { iconName: "UserMinus", value: all.length, label: "Ex-Member", color: "red" },
-          { iconName: "CreditCard", value: all.filter((m) => m.subscription === "Premium").length, label: "Premium", color: "blue" },
-          { iconName: "FileText", value: all.filter((m) => m.subscription === "Basic").length, label: "Basic", color: "green" },
+          { iconName: "Timer", value: all.filter((m) => m.durationMonths >= 24).length, label: "Multi-tahun", color: "blue" },
+          { iconName: "Clock", value: all.filter((m) => m.durationMonths === 12).length, label: "1 Tahun", color: "green" },
         ]}
       />
 

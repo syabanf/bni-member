@@ -7,6 +7,7 @@ import { InMemoryChapterRepository } from "@/infrastructure/repositories/InMemor
 import { InMemoryReferralRepository } from "@/infrastructure/repositories/InMemoryReferralRepository";
 import { InMemoryVisitorRepository } from "@/infrastructure/repositories/InMemoryVisitorRepository";
 import { InMemoryAuthRepository } from "@/infrastructure/repositories/InMemoryAuthRepository";
+import { InMemoryMembershipPackageRepository } from "@/infrastructure/repositories/InMemoryMembershipPackageRepository";
 import { MockNotificationService } from "@/infrastructure/services/MockNotificationService";
 
 import { GetDashboardOverview } from "@/application/use-cases/GetDashboardOverview";
@@ -37,6 +38,7 @@ import { DeleteVisitor } from "@/application/use-cases/DeleteVisitor";
 import { GetMemberPerformance } from "@/application/use-cases/GetMemberPerformance";
 import { GetMembershipLeaderboard } from "@/application/use-cases/GetMembershipLeaderboard";
 import { Login } from "@/application/use-cases/Login";
+import { ListMembershipPackages } from "@/application/use-cases/ListMembershipPackages";
 
 /**
  * The set of use cases exposed to the presentation layer.
@@ -76,6 +78,8 @@ export interface Services {
   getMembershipLeaderboard: GetMembershipLeaderboard;
   // Auth
   login: Login;
+  // Membership packages
+  listMembershipPackages: ListMembershipPackages;
 }
 
 /**
@@ -94,6 +98,7 @@ export function createServices(): Services {
   const referralRepo = new InMemoryReferralRepository();
   const visitorRepo = new InMemoryVisitorRepository();
   const authRepo = new InMemoryAuthRepository();
+  const packageRepo = new InMemoryMembershipPackageRepository();
   const notificationService = new MockNotificationService();
 
   // Application (use cases) wired to the ports above
@@ -131,5 +136,6 @@ export function createServices(): Services {
     getMembershipLeaderboard: new GetMembershipLeaderboard(memberRepo, referralRepo, visitorRepo),
 
     login: new Login(authRepo),
+    listMembershipPackages: new ListMembershipPackages(packageRepo),
   };
 }

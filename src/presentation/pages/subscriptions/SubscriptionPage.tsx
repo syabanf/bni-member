@@ -5,6 +5,7 @@ import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHeader } from "@/presentation/components/ui/PageHeader";
 import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
+import { PackageCards } from "@/presentation/components/subscriptions/PackageCards";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
 import { FilterBar } from "@/presentation/components/ui/FilterBar";
 import { SearchInput } from "@/presentation/components/ui/SearchInput";
@@ -13,10 +14,11 @@ import { IconButton } from "@/presentation/components/ui/IconButton";
 import { formatCurrency, formatDate } from "@/presentation/utils/format";
 
 export function SubscriptionPage() {
-  const { getSubscriptions } = useServices();
+  const { getSubscriptions, listMembershipPackages } = useServices();
   const [search, setSearch] = useState("");
   const { data } = useAsync(() => getSubscriptions.execute(search), [search]);
   const { data: allSubs } = useAsync(() => getSubscriptions.execute(""), []);
+  const { data: packages } = useAsync(() => listMembershipPackages.execute(), []);
   const rows = data ?? [];
   const all = allSubs ?? [];
   const totalValue = all.reduce((s, x) => s + x.amount, 0);
@@ -79,6 +81,8 @@ export function SubscriptionPage() {
           { iconName: "CreditCard", value: formatCurrency(totalValue), label: "Total Nilai", color: "red" },
         ]}
       />
+
+      <PackageCards packages={packages ?? []} />
 
       <FilterBar>
         <SearchInput

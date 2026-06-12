@@ -1,6 +1,7 @@
 import type { MemberRepository } from "@/domain/repositories/MemberRepository";
 import type { ChapterRepository } from "@/domain/repositories/ChapterRepository";
 import type { Member, MemberRole, MemberStatus } from "@/domain/entities/Member";
+import { packageNameForDuration } from "@/domain/entities/MembershipPackage";
 
 export interface SaveMemberInput {
   id?: string;
@@ -10,7 +11,6 @@ export interface SaveMemberInput {
   classification: string;
   role: MemberRole;
   status: MemberStatus;
-  subscription: string;
   joinDate: string;
   durationMonths: number;
   registrationFee: number;
@@ -62,6 +62,7 @@ export class SaveMember {
       ...rest,
       classification,
       chapter: chapter.name,
+      subscription: packageNameForDuration(rest.durationMonths),
     };
     return id ? this.members.update(id, data) : this.members.create(data);
   }

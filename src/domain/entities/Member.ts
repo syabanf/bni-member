@@ -5,8 +5,6 @@
  */
 export type MemberStatus = "Active" | "Pending" | "Overdue" | "Expired";
 
-export type SubscriptionTier = "Basic" | "Premium";
-
 export type MemberRole =
   | "President"
   | "Vice President"
@@ -27,7 +25,8 @@ export interface Member {
   classification: string;
   role: MemberRole;
   status: MemberStatus;
-  subscription: SubscriptionTier | string;
+  /** Membership package term, e.g. "1 Tahun" / "2 Tahun" / "5 Tahun" (derived from durationMonths). */
+  subscription: string;
   joinDate: string;
   /** Membership term in months (12 / 24 / 60). */
   durationMonths: number;

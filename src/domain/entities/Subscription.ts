@@ -7,7 +7,7 @@ export interface Subscription {
   id: string;
   memberId: string;
   memberName: string;
-  /** Subscription plan, e.g. "Basic" or "Premium". */
+  /** Membership package term, e.g. "1 Tahun" / "2 Tahun" / "5 Tahun". */
   plan: string;
   amount: number;
   status: SubscriptionStatus;

@@ -15,11 +15,11 @@ const ROLE_OPTIONS = ["President", "Vice President", "Secretary/Treasurer", "Mem
   label: r,
 }));
 const STATUS_OPTIONS = ["Active", "Pending", "Overdue", "Expired"].map((s) => ({ value: s, label: s }));
-const SUBSCRIPTION_OPTIONS = [
-  { value: "Basic", label: "Basic" },
-  { value: "Premium", label: "Premium" },
-];
-const DURATION_OPTIONS = MEMBERSHIP_DURATIONS.map((d) => ({ value: String(d), label: `${d} bulan` }));
+const TERM_LABEL: Record<number, string> = { 12: "1 Tahun", 24: "2 Tahun", 60: "5 Tahun" };
+const DURATION_OPTIONS = MEMBERSHIP_DURATIONS.map((d) => ({
+  value: String(d),
+  label: TERM_LABEL[d] ?? `${d} bulan`,
+}));
 
 interface ChapterOption {
   id: string;
@@ -52,7 +52,6 @@ export function MemberFormModal({
   const [classification, setClassification] = useState("");
   const [role, setRole] = useState<MemberRole>("Member");
   const [status, setStatus] = useState<MemberStatus>("Active");
-  const [subscription, setSubscription] = useState("Basic");
   const [joinDate, setJoinDate] = useState(today());
   const [durationMonths, setDurationMonths] = useState(12);
   const [registrationFee, setRegistrationFee] = useState(2_500_000);
@@ -69,7 +68,6 @@ export function MemberFormModal({
     setClassification(initial?.classification ?? "");
     setRole(initial?.role ?? "Member");
     setStatus(initial?.status ?? "Active");
-    setSubscription(initial?.subscription ?? "Basic");
     setJoinDate(initial?.joinDate ?? today());
     setDurationMonths(initial?.durationMonths ?? 12);
     setRegistrationFee(initial?.registrationFee ?? 2_500_000);
@@ -90,7 +88,6 @@ export function MemberFormModal({
         classification: classification.trim(),
         role,
         status,
-        subscription,
         joinDate,
         durationMonths,
         registrationFee,
@@ -162,12 +159,12 @@ export function MemberFormModal({
         <FormField label="Tanggal Bergabung">
           <input type="date" className={fieldInputClass} value={joinDate} onChange={(e) => setJoinDate(e.target.value)} />
         </FormField>
-        <FormField label="Durasi Membership">
+        <FormField label="Paket Membership">
           <Select
             value={String(durationMonths)}
             onChange={(v) => setDurationMonths(Number(v))}
             options={DURATION_OPTIONS}
-            ariaLabel="Durasi membership"
+            ariaLabel="Paket membership"
           />
         </FormField>
       </div>
@@ -193,14 +190,9 @@ export function MemberFormModal({
         </FormField>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <FormField label="Paket">
-          <Select value={subscription} onChange={setSubscription} options={SUBSCRIPTION_OPTIONS} ariaLabel="Paket" />
-        </FormField>
-        <FormField label="Sponsor (diundang oleh)">
-          <Select value={sponsorId} onChange={setSponsorId} options={sponsorOptions} ariaLabel="Sponsor" />
-        </FormField>
-      </div>
+      <FormField label="Sponsor (diundang oleh)">
+        <Select value={sponsorId} onChange={setSponsorId} options={sponsorOptions} ariaLabel="Sponsor" />
+      </FormField>
     </FormModal>
   );
 }
