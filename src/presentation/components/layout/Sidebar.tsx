@@ -40,7 +40,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             onClick={() => toggleMenu(item.label)}
             aria-expanded={open}
             className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors duration-150 ${
-              parentActive ? "bg-white/5 text-white" : "text-white/70 hover:bg-white/5 hover:text-white"
+              parentActive
+                ? "bg-gray-50 text-gray-900"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }`}
           >
             <span className="flex items-center gap-3">
@@ -48,14 +50,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               <span className="text-sm font-medium">{item.label}</span>
             </span>
             {open ? (
-              <ChevronDown className="w-4 h-4 opacity-70" />
+              <ChevronDown className="w-4 h-4 text-gray-400" />
             ) : (
-              <ChevronRight className="w-4 h-4 opacity-70" />
+              <ChevronRight className="w-4 h-4 text-gray-400" />
             )}
           </button>
 
           {open && (
-            <div className="mt-1 ml-5 space-y-1 border-l border-white/10 pl-3">
+            <div className="mt-1 ml-5 space-y-1 border-l border-gray-200 pl-3">
               {item.children.map((sub) => {
                 const SubIcon = getIcon(sub.iconName);
                 const active = isActive(sub.href);
@@ -66,8 +68,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     onClick={onClose}
                     className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors duration-150 ${
                       active
-                        ? "bg-bni-primary text-white shadow-glow"
-                        : "text-white/55 hover:bg-white/5 hover:text-white"
+                        ? "bg-bni-light text-bni-primary font-medium"
+                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                     }`}
                   >
                     <span className="flex items-center gap-3">
@@ -75,11 +77,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                       <span>{sub.label}</span>
                     </span>
                     {sub.badge && (
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${
-                          active ? "bg-white/25 text-white" : "bg-bni-primary text-white"
-                        }`}
-                      >
+                      <span className="bg-bni-primary text-white text-xs px-2 py-0.5 rounded-full">
                         {sub.badge}
                       </span>
                     )}
@@ -100,8 +98,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         onClick={onClose}
         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-150 ${
           active
-            ? "bg-bni-primary text-white shadow-glow"
-            : "text-white/70 hover:bg-white/5 hover:text-white"
+            ? "bg-bni-light text-bni-primary font-medium"
+            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
         }`}
       >
         <Icon className="w-5 h-5" />
@@ -119,27 +117,30 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-sm"
           aria-hidden="true"
           onClick={onClose}
         />
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-sidebar-gradient text-white z-50 flex flex-col border-r border-white/5 transform transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-white text-gray-900 z-50 flex flex-col border-r border-gray-200 transform transition-transform duration-300 md:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="h-16 flex items-center gap-2.5 px-5 border-b border-white/10 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-bni-primary flex items-center justify-center text-white text-lg font-bold shadow-glow">
+        <div className="flex items-start gap-3 px-5 py-4 border-b border-gray-100 shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-bni-primary flex items-center justify-center text-white text-lg font-bold shadow-glow">
             B
           </div>
           <div className="leading-tight">
-            <p className="text-sm font-bold text-white">BNI Indonesia</p>
-            <p className="text-[10px] uppercase tracking-wider text-white/40">Payment Dashboard</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-bni-primary">
+              BNI Indonesia
+            </p>
+            <p className="text-base font-bold text-gray-900">Payment Hub</p>
+            <p className="text-[11px] text-gray-400">Membership Platform</p>
           </div>
           <button
-            className="ml-auto md:hidden text-white/70 hover:text-white"
+            className="ml-auto md:hidden text-gray-400 hover:text-gray-700"
             onClick={onClose}
             aria-label="Tutup menu"
           >
@@ -151,7 +152,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           {navigation.map((section, idx) => (
             <div key={section.title ?? `section-${idx}`} className="space-y-1">
               {section.title && (
-                <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-white/35">
+                <p className="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
                   {section.title}
                 </p>
               )}
@@ -160,14 +161,14 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           ))}
         </nav>
 
-        <div className="shrink-0 p-3">
-          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5">
-            <div className="w-9 h-9 rounded-full bg-bni-primary flex items-center justify-center text-white font-medium shadow-glow">
+        <div className="shrink-0 p-3 border-t border-gray-100">
+          <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+            <div className="w-9 h-9 rounded-full bg-bni-primary flex items-center justify-center text-white font-medium">
               A
             </div>
             <div className="leading-tight">
-              <p className="text-sm font-medium text-white">Admin User</p>
-              <p className="text-xs text-white/50">Administrator</p>
+              <p className="text-sm font-medium text-gray-900">Admin User</p>
+              <p className="text-xs text-gray-500">Administrator</p>
             </div>
           </div>
         </div>

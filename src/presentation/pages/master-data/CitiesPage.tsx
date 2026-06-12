@@ -1,0 +1,149 @@
+import { useState } from "react";
+import { Plus, Pencil, Trash2, Eye, RefreshCw } from "lucide-react";
+import type { City } from "@/domain/entities/City";
+import type { CityWithStats } from "@/application/dto/CityWithStats";
+import { useServices } from "@/presentation/providers/ServicesProvider";
+import { useAsync } from "@/presentation/hooks/useAsync";
+import { PageHero } from "@/presentation/components/ui/PageHero";
+import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
+import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
+import { IconButton } from "@/presentation/components/ui/IconButton";
+import { CityFormModal } from "@/presentation/components/master-data/CityFormModal";
+import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
+import { CityDetailModal } from "@/presentation/components/master-data/CityDetailModal";
+
+const primaryBtn =
+  "flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium";
+const ghostBtn =
+  "flex items-center gap-2 border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium";
+
+export function CitiesPage() {
+  const { listCities, saveCity, deleteCity } = useServices();
+  const [refresh, setRefresh] = useState(0);
+  const bump = () => setRefresh((r) => r + 1);
+  const { data } = useAsync(() => listCities.execute(), [refresh]);
+  const rows = data ?? [];
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState<City | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<City | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteCity.execute(deleteTarget.id);
+      setDeleteTarget(null);
+      bump();
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : "Gagal menghapus");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const columns: Column<CityWithStats>[] = [
+    {
+      key: "name",
+      header: "Kota",
+      primary: true,
+      cell: ({ city }) => (
+        <div>
+          <p className="text-sm font-medium text-gray-900">{city.name}</p>
+          <p className="text-xs text-gray-500">
+            {city.code} · {city.province}
+          </p>
+        </div>
+      ),
+    },
+    { key: "chapters", header: "Chapter", cell: (c) => c.chapterCount },
+    { key: "members", header: "Member", cell: (c) => c.memberCount },
+    { key: "status", header: "Status", cell: ({ city }) => <StatusBadge status={city.status} /> },
+    {
+      key: "actions",
+      header: "Aksi",
+      actions: true,
+      cell: ({ city }) => (
+        <div className="flex items-center gap-1">
+          <IconButton label={`Detail ${city.name}`} onClick={() => setDetailId(city.id)}>
+            <Eye className="w-4 h-4" />
+          </IconButton>
+          <IconButton
+            label={`Edit ${city.name}`}
+            onClick={() => {
+              setEditing(city);
+              setModalOpen(true);
+            }}
+          >
+            <Pencil className="w-4 h-4" />
+          </IconButton>
+          <IconButton label={`Hapus ${city.name}`} tone="danger" onClick={() => setDeleteTarget(city)}>
+            <Trash2 className="w-4 h-4" />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <PageHero
+        eyebrow="BNI Indonesia"
+        title="Master Kota"
+        description="Kelola daftar kota/area. Tambah, edit, atau hapus kota — setiap kota menaungi beberapa chapter."
+        actions={
+          <>
+            <button onClick={bump} className={ghostBtn}>
+              <RefreshCw className="w-4 h-4" />
+              Refresh
+            </button>
+            <button
+              onClick={() => {
+                setEditing(null);
+                setModalOpen(true);
+              }}
+              className={primaryBtn}
+            >
+              <Plus className="w-4 h-4" />
+              Tambah Kota
+            </button>
+          </>
+        }
+      />
+
+      <DataTable
+        columns={columns}
+        rows={rows}
+        rowKey={({ city }) => city.id}
+        emptyText="Belum ada kota"
+      />
+
+      <CityFormModal
+        isOpen={modalOpen}
+        initial={editing}
+        onClose={() => setModalOpen(false)}
+        onSubmit={async (input) => {
+          await saveCity.execute(input);
+          bump();
+        }}
+      />
+      <ConfirmDeleteModal
+        isOpen={!!deleteTarget}
+        title="Hapus Kota"
+        message={`Yakin menghapus "${deleteTarget?.name}"? Tindakan ini tidak dapat dibatalkan.`}
+        error={deleteError}
+        deleting={deleting}
+        onCancel={() => {
+          setDeleteTarget(null);
+          setDeleteError(null);
+        }}
+        onConfirm={handleDelete}
+      />
+      {detailId && <CityDetailModal cityId={detailId} onClose={() => setDetailId(null)} />}
+    </div>
+  );
+}

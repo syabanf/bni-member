@@ -25,7 +25,7 @@ export const navigation: NavSection[] = [
     items: [{ label: "Dashboard", href: "/", iconName: "LayoutDashboard" }],
   },
   {
-    title: "Manajemen",
+    title: "Pembayaran",
     items: [
       {
         label: "Payment",
@@ -37,6 +37,11 @@ export const navigation: NavSection[] = [
           { label: "Overdue Payment", href: "/payments/overdue", iconName: "AlertTriangle", badge: 7 },
         ],
       },
+    ],
+  },
+  {
+    title: "Keanggotaan",
+    items: [
       {
         label: "Member Data",
         iconName: "Users",
@@ -51,7 +56,15 @@ export const navigation: NavSection[] = [
     ],
   },
   {
-    title: "Sistem",
+    title: "Master Data",
+    items: [
+      { label: "Kota", href: "/master-data/cities", iconName: "MapPin" },
+      { label: "Chapter", href: "/master-data/chapters", iconName: "Building2" },
+      { label: "Membership Plan", href: "/master-data/plans", iconName: "Database" },
+    ],
+  },
+  {
+    title: "Integrasi",
     items: [
       {
         label: "Data Integration",
@@ -60,13 +73,6 @@ export const navigation: NavSection[] = [
           { label: "Export / Import", href: "/integration/import", iconName: "FileText" },
           { label: "Paper.id", href: "/integration/paper-id", iconName: "Database" },
           { label: "Lark (Feishu)", href: "/integration/lark", iconName: "Link2" },
-        ],
-      },
-      {
-        label: "Setting",
-        iconName: "Settings",
-        children: [
-          { label: "Master Data", href: "/settings/master-data", iconName: "Database" },
         ],
       },
     ],

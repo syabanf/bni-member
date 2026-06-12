@@ -15,6 +15,8 @@ import {
   Database,
   Link2,
   Send,
+  MapPin,
+  Building2,
 } from "lucide-react";
 
 /** Icons are referenced by string name so config files stay serialisable. */
@@ -36,6 +38,8 @@ const iconMap = {
   Database,
   Link2,
   Send,
+  MapPin,
+  Building2,
 } satisfies Record<string, IconComponent>;
 
 export type IconName = keyof typeof iconMap;

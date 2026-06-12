@@ -10,7 +10,9 @@ import { SubscriptionPage } from "@/presentation/pages/subscriptions/Subscriptio
 import { ImportExportPage } from "@/presentation/pages/integration/ImportExportPage";
 import { PaperIdPage } from "@/presentation/pages/integration/PaperIdPage";
 import { LarkPage } from "@/presentation/pages/integration/LarkPage";
-import { MasterDataPage } from "@/presentation/pages/settings/MasterDataPage";
+import { CitiesPage } from "@/presentation/pages/master-data/CitiesPage";
+import { ChaptersPage } from "@/presentation/pages/master-data/ChaptersPage";
+import { MembershipPlansPage } from "@/presentation/pages/master-data/MembershipPlansPage";
 
 export function App() {
   return (
@@ -34,7 +36,9 @@ export function App() {
         <Route path="/integration/paper-id" element={<PaperIdPage />} />
         <Route path="/integration/lark" element={<LarkPage />} />
 
-        <Route path="/settings/master-data" element={<MasterDataPage />} />
+        <Route path="/master-data/cities" element={<CitiesPage />} />
+        <Route path="/master-data/chapters" element={<ChaptersPage />} />
+        <Route path="/master-data/plans" element={<MembershipPlansPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

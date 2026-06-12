@@ -52,9 +52,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
               onClick={() => setShowUserMenu((v) => !v)}
               aria-label="Menu pengguna"
               aria-expanded={showUserMenu}
-              className="flex items-center gap-2 p-1.5 pr-2 hover:bg-gray-100 rounded-xl"
+              className="flex items-center gap-2.5 p-1.5 md:pl-3 hover:bg-gray-100 rounded-xl"
             >
-              <div className="w-8 h-8 rounded-lg bg-bni-primary flex items-center justify-center text-white text-sm font-semibold">
+              <div className="hidden md:block text-right leading-tight">
+                <p className="text-sm font-medium text-gray-900">Admin User</p>
+                <p className="text-xs text-gray-500">Administrator</p>
+              </div>
+              <div className="w-9 h-9 rounded-lg bg-bni-primary flex items-center justify-center text-white text-sm font-semibold">
                 A
               </div>
               <ChevronDown className="w-4 h-4 text-gray-400 hidden md:block" />
