@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BNI Payment Dashboard
+
+Membership & payment management dashboard for BNI Indonesia, built with **Vite + React + TypeScript** and organised with **Clean Architecture**.
+
+> Migrated from Next.js (App Router) to a Vite SPA. Routing is handled by React Router; all data currently comes from in-memory mock repositories behind domain interfaces, so swapping in a real API touches only the infrastructure layer.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # start Vite dev server at http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Other scripts:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build      # type-check (tsc --noEmit) then production build (vite build)
+npm run preview    # preview the production build
+npm run typecheck  # type-check only
+npm run lint       # eslint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Tech Stack
 
-## Learn More
+- **Vite 5** + **React 18** + **TypeScript** (strict)
+- **React Router 6** for client-side routing
+- **Tailwind CSS 3** for styling (BNI brand colours in `tailwind.config.ts`)
+- **Recharts** for the payment-status donut chart
+- **lucide-react** for icons
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The code follows Clean Architecture. Dependencies point **inward** only — outer
+layers depend on inner layers, never the reverse.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+┌─────────────────────────────────────────────────────────┐
+│ presentation/   React: pages, components, hooks, router   │  → depends on application + domain
+├─────────────────────────────────────────────────────────┤
+│ application/    use cases (one responsibility each)       │  → depends on domain
+├─────────────────────────────────────────────────────────┤
+│ domain/         entities, repository & service interfaces │  → depends on nothing
+├─────────────────────────────────────────────────────────┤
+│ infrastructure/ in-memory repositories + mock data        │  → implements domain interfaces
+└─────────────────────────────────────────────────────────┘
+                  di/  composition root wires it all together
+```
 
-## Deploy on Vercel
+```
+src/
+├── domain/                 # Enterprise rules — pure, framework-free
+│   ├── entities/           #   Member, Payment, Subscription, MasterData, ImportRecord
+│   ├── repositories/       #   repository interfaces (ports)
+│   └── services/           #   NotificationService interface (port)
+├── application/            # Application rules — use cases + DTOs
+│   ├── dto/
+│   └── use-cases/          #   GetDashboardOverview, GetPaymentsByCategory, ...
+├── infrastructure/         # Frameworks & drivers — implementation details
+│   ├── data/               #   mock seed data
+│   ├── repositories/       #   InMemory* adapters implementing the ports
+│   └── services/           #   MockNotificationService (simulated send)
+├── di/
+│   └── container.ts        # composition root: wires adapters → use cases
+└── presentation/           # UI (React)
+    ├── App.tsx             #   route tree
+    ├── providers/          #   ServicesProvider (exposes use cases via context)
+    ├── hooks/              #   useAsync (loading/error/data)
+    ├── layouts/            #   DashboardLayout (sidebar + topbar + <Outlet/>)
+    ├── components/         #   ui/ (Modal, StatCard, ...), layout/, dashboard/, members/
+    ├── pages/              #   one folder per feature area
+    ├── config/             #   navigation + icon registry
+    └── utils/              #   formatters
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Key ideas
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Ports & adapters.** The presentation/application layers depend on interfaces
+  in `domain/repositories` and `domain/services`. Concrete `InMemory*` adapters
+  live in `infrastructure/`. To move to a real backend, add e.g. `HttpMemberRepository`
+  and swap it in `di/container.ts` — no use case or component changes.
+- **Use cases** encapsulate one piece of application logic (`GetPaymentsByCategory`
+  also knows that the "renewal" bucket is derived from members, not payments).
+- **Dependency injection** happens once in `createServices()` and is exposed to
+  React through `ServicesProvider` / `useServices()`. The provider accepts an
+  optional `services` override, which makes the UI trivial to test with fakes.
+
+## Notable changes vs. the original
+
+- Migrated Next.js App Router → Vite + React Router.
+- Fixed a build-breaking JSX corruption (`003e` tokens) on the Lark page.
+- Single dashboard route (removed the duplicate, drifted `/dashboard` copy).
+- Extracted the send-confirmation + success modals that were copy-pasted across
+  the four payment pages into shared, accessible components.
+- The four payment pages collapse into one config-driven `PaymentCategoryPage`.
+- Accessible modals (role/aria, Escape, focus trap, scroll lock, focus restore).
+- Replaced the unused Geist font wiring with a single Inter font (loaded in `index.html`).
+- All mock data moved out of the UI into `infrastructure/data` behind repositories.
