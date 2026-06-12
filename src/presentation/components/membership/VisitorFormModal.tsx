@@ -4,7 +4,9 @@ import { VISITOR_STAGES, type Visitor, type VisitorStatus } from "@/domain/entit
 import type { SaveVisitorInput } from "@/application/use-cases/SaveVisitor";
 import { FormModal } from "@/presentation/components/ui/FormModal";
 import { FormField, fieldInputClass } from "@/presentation/components/ui/FormField";
+import { Select } from "@/presentation/components/ui/Select";
 
+const STATUS_OPTIONS = VISITOR_STAGES.map((s) => ({ value: s, label: s }));
 const today = () => new Date().toISOString().slice(0, 10);
 
 interface ChapterOption {
@@ -105,28 +107,22 @@ export function VisitorFormModal({
 
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Diundang oleh" required>
-          <select className={fieldInputClass} value={invitedById} onChange={(e) => setInvitedBy(e.target.value)} required>
-            <option value="" disabled>
-              Pilih member
-            </option>
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={invitedById}
+            onChange={setInvitedBy}
+            options={members.map((m) => ({ value: m.id, label: m.name }))}
+            placeholder="Pilih member"
+            ariaLabel="Diundang oleh"
+          />
         </FormField>
         <FormField label="Chapter" required>
-          <select className={fieldInputClass} value={chapterId} onChange={(e) => setChapterId(e.target.value)} required>
-            <option value="" disabled>
-              Pilih chapter
-            </option>
-            {chapters.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={chapterId}
+            onChange={setChapterId}
+            options={chapters.map((c) => ({ value: c.id, label: c.name }))}
+            placeholder="Pilih chapter"
+            ariaLabel="Chapter"
+          />
         </FormField>
       </div>
 
@@ -135,13 +131,7 @@ export function VisitorFormModal({
           <input type="date" className={fieldInputClass} value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
         </FormField>
         <FormField label="Status">
-          <select className={fieldInputClass} value={status} onChange={(e) => setStatus(e.target.value as VisitorStatus)}>
-            {VISITOR_STAGES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          <Select value={status} onChange={(v) => setStatus(v as VisitorStatus)} options={STATUS_OPTIONS} ariaLabel="Status visitor" />
         </FormField>
       </div>
     </FormModal>

@@ -4,9 +4,16 @@ import type { Referral, ReferralStatus, ReferralTier } from "@/domain/entities/R
 import type { SaveReferralInput } from "@/application/use-cases/SaveReferral";
 import { FormModal } from "@/presentation/components/ui/FormModal";
 import { FormField, fieldInputClass } from "@/presentation/components/ui/FormField";
+import { Select } from "@/presentation/components/ui/Select";
 
-const TIERS: ReferralTier[] = ["Inside", "Outside"];
-const STATUSES: ReferralStatus[] = ["Open", "In Progress", "Closed", "Cancelled"];
+const TIER_OPTIONS = [
+  { value: "Inside", label: "Inside (RGI)" },
+  { value: "Outside", label: "Outside (RGO)" },
+];
+const STATUS_OPTIONS = ["Open", "In Progress", "Closed", "Cancelled"].map((s) => ({
+  value: s,
+  label: s,
+}));
 const today = () => new Date().toISOString().slice(0, 10);
 
 interface ReferralFormModalProps {
@@ -68,6 +75,8 @@ export function ReferralFormModal({
     }
   };
 
+  const memberOptions = members.map((m) => ({ value: m.id, label: m.name }));
+
   return (
     <FormModal
       isOpen={isOpen}
@@ -79,28 +88,10 @@ export function ReferralFormModal({
     >
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Dari (pemberi)" required>
-          <select className={fieldInputClass} value={fromMemberId} onChange={(e) => setFrom(e.target.value)} required>
-            <option value="" disabled>
-              Pilih member
-            </option>
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+          <Select value={fromMemberId} onChange={setFrom} options={memberOptions} placeholder="Pilih member" ariaLabel="Pemberi referral" />
         </FormField>
         <FormField label="Ke (penerima)" required>
-          <select className={fieldInputClass} value={toMemberId} onChange={(e) => setTo(e.target.value)} required>
-            <option value="" disabled>
-              Pilih member
-            </option>
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+          <Select value={toMemberId} onChange={setTo} options={memberOptions} placeholder="Pilih member" ariaLabel="Penerima referral" />
         </FormField>
       </div>
 
@@ -119,25 +110,13 @@ export function ReferralFormModal({
           <input type="date" className={fieldInputClass} value={date} onChange={(e) => setDate(e.target.value)} />
         </FormField>
         <FormField label="Tier">
-          <select className={fieldInputClass} value={tier} onChange={(e) => setTier(e.target.value as ReferralTier)}>
-            {TIERS.map((t) => (
-              <option key={t} value={t}>
-                {t === "Inside" ? "Inside (RGI)" : "Outside (RGO)"}
-              </option>
-            ))}
-          </select>
+          <Select value={tier} onChange={(v) => setTier(v as ReferralTier)} options={TIER_OPTIONS} ariaLabel="Tier referral" />
         </FormField>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Status">
-          <select className={fieldInputClass} value={status} onChange={(e) => setStatus(e.target.value as ReferralStatus)}>
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          <Select value={status} onChange={(v) => setStatus(v as ReferralStatus)} options={STATUS_OPTIONS} ariaLabel="Status referral" />
         </FormField>
         <FormField label="TYFCB (Rp) — saat Closed">
           <input

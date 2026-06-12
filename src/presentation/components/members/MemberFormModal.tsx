@@ -8,9 +8,18 @@ import {
 import type { SaveMemberInput } from "@/application/use-cases/SaveMember";
 import { FormModal } from "@/presentation/components/ui/FormModal";
 import { FormField, fieldInputClass } from "@/presentation/components/ui/FormField";
+import { Select } from "@/presentation/components/ui/Select";
 
-const ROLES: MemberRole[] = ["President", "Vice President", "Secretary/Treasurer", "Member"];
-const STATUSES: MemberStatus[] = ["Active", "Pending", "Overdue", "Expired"];
+const ROLE_OPTIONS = ["President", "Vice President", "Secretary/Treasurer", "Member"].map((r) => ({
+  value: r,
+  label: r,
+}));
+const STATUS_OPTIONS = ["Active", "Pending", "Overdue", "Expired"].map((s) => ({ value: s, label: s }));
+const SUBSCRIPTION_OPTIONS = [
+  { value: "Basic", label: "Basic" },
+  { value: "Premium", label: "Premium" },
+];
+const DURATION_OPTIONS = MEMBERSHIP_DURATIONS.map((d) => ({ value: String(d), label: `${d} bulan` }));
 
 interface ChapterOption {
   id: string;
@@ -96,7 +105,10 @@ export function MemberFormModal({
     }
   };
 
-  const sponsorOptions = members.filter((m) => m.id !== initial?.id);
+  const sponsorOptions = [
+    { value: "", label: "— Tanpa sponsor —" },
+    ...members.filter((m) => m.id !== initial?.id).map((m) => ({ value: m.id, label: m.name })),
+  ];
 
   return (
     <FormModal
@@ -118,16 +130,13 @@ export function MemberFormModal({
 
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Chapter" required>
-          <select className={fieldInputClass} value={chapterId} onChange={(e) => setChapterId(e.target.value)} required>
-            <option value="" disabled>
-              Pilih chapter
-            </option>
-            {chapters.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <Select
+            value={chapterId}
+            onChange={setChapterId}
+            options={chapters.map((c) => ({ value: c.id, label: c.name }))}
+            placeholder="Pilih chapter"
+            ariaLabel="Chapter"
+          />
         </FormField>
         <FormField label="Klasifikasi (profesi)" required>
           <input
@@ -142,22 +151,10 @@ export function MemberFormModal({
 
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Role">
-          <select className={fieldInputClass} value={role} onChange={(e) => setRole(e.target.value as MemberRole)}>
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
+          <Select value={role} onChange={(v) => setRole(v as MemberRole)} options={ROLE_OPTIONS} ariaLabel="Role" />
         </FormField>
         <FormField label="Status">
-          <select className={fieldInputClass} value={status} onChange={(e) => setStatus(e.target.value as MemberStatus)}>
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+          <Select value={status} onChange={(v) => setStatus(v as MemberStatus)} options={STATUS_OPTIONS} ariaLabel="Status" />
         </FormField>
       </div>
 
@@ -166,17 +163,12 @@ export function MemberFormModal({
           <input type="date" className={fieldInputClass} value={joinDate} onChange={(e) => setJoinDate(e.target.value)} />
         </FormField>
         <FormField label="Durasi Membership">
-          <select
-            className={fieldInputClass}
-            value={durationMonths}
-            onChange={(e) => setDurationMonths(Number(e.target.value))}
-          >
-            {MEMBERSHIP_DURATIONS.map((d) => (
-              <option key={d} value={d}>
-                {d} bulan
-              </option>
-            ))}
-          </select>
+          <Select
+            value={String(durationMonths)}
+            onChange={(v) => setDurationMonths(Number(v))}
+            options={DURATION_OPTIONS}
+            ariaLabel="Durasi membership"
+          />
         </FormField>
       </div>
 
@@ -203,20 +195,10 @@ export function MemberFormModal({
 
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Paket">
-          <select className={fieldInputClass} value={subscription} onChange={(e) => setSubscription(e.target.value)}>
-            <option value="Basic">Basic</option>
-            <option value="Premium">Premium</option>
-          </select>
+          <Select value={subscription} onChange={setSubscription} options={SUBSCRIPTION_OPTIONS} ariaLabel="Paket" />
         </FormField>
         <FormField label="Sponsor (diundang oleh)">
-          <select className={fieldInputClass} value={sponsorId} onChange={(e) => setSponsorId(e.target.value)}>
-            <option value="">— Tanpa sponsor —</option>
-            {sponsorOptions.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
+          <Select value={sponsorId} onChange={setSponsorId} options={sponsorOptions} ariaLabel="Sponsor" />
         </FormField>
       </div>
     </FormModal>

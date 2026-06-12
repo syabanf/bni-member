@@ -1,7 +1,6 @@
-export interface FilterOption {
-  value: string;
-  label: string;
-}
+import { Select, type SelectOption } from "./Select";
+
+export type FilterOption = SelectOption;
 
 interface FilterSelectProps {
   value: string;
@@ -11,7 +10,7 @@ interface FilterSelectProps {
   className?: string;
 }
 
-/** Standardised select used in filter bars. */
+/** Standardised scrollable dropdown used in filter bars. */
 export function FilterSelect({
   value,
   onChange,
@@ -20,17 +19,12 @@ export function FilterSelect({
   className,
 }: FilterSelectProps) {
   return (
-    <select
+    <Select
       value={value}
-      onChange={(e) => onChange(e.target.value)}
-      aria-label={ariaLabel}
-      className={`px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-bni-primary/20 ${className ?? ""}`}
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
+      onChange={onChange}
+      options={options}
+      ariaLabel={ariaLabel}
+      className={className ?? "w-full md:w-44"}
+    />
   );
 }

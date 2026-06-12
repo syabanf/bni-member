@@ -3,6 +3,12 @@ import type { City, CityStatus } from "@/domain/entities/City";
 import type { SaveCityInput } from "@/application/use-cases/SaveCity";
 import { FormModal } from "@/presentation/components/ui/FormModal";
 import { FormField, fieldInputClass } from "@/presentation/components/ui/FormField";
+import { Select } from "@/presentation/components/ui/Select";
+
+const STATUS_OPTIONS = [
+  { value: "Active", label: "Active" },
+  { value: "Inactive", label: "Inactive" },
+];
 
 interface CityFormModalProps {
   isOpen: boolean;
@@ -66,10 +72,12 @@ export function CityFormModal({ isOpen, initial, onClose, onSubmit }: CityFormMo
         <input className={fieldInputClass} value={province} onChange={(e) => setProvince(e.target.value)} required />
       </FormField>
       <FormField label="Status">
-        <select className={fieldInputClass} value={status} onChange={(e) => setStatus(e.target.value as CityStatus)}>
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-        </select>
+        <Select
+          value={status}
+          onChange={(v) => setStatus(v as CityStatus)}
+          options={STATUS_OPTIONS}
+          ariaLabel="Status kota"
+        />
       </FormField>
     </FormModal>
   );

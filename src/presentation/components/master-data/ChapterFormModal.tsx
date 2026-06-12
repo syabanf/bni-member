@@ -4,8 +4,15 @@ import type { Chapter, ChapterStatus } from "@/domain/entities/Chapter";
 import type { SaveChapterInput } from "@/application/use-cases/SaveChapter";
 import { FormModal } from "@/presentation/components/ui/FormModal";
 import { FormField, fieldInputClass } from "@/presentation/components/ui/FormField";
+import { Select } from "@/presentation/components/ui/Select";
 
 const MEETING_DAYS = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+const DAY_OPTIONS = MEETING_DAYS.map((d) => ({ value: d, label: d }));
+const STATUS_OPTIONS = [
+  { value: "Active", label: "Active" },
+  { value: "Forming", label: "Forming" },
+  { value: "Inactive", label: "Inactive" },
+];
 
 interface ChapterFormModalProps {
   isOpen: boolean;
@@ -81,26 +88,17 @@ export function ChapterFormModal({ isOpen, initial, cities, onClose, onSubmit }:
         </FormField>
       </div>
       <FormField label="Kota" required>
-        <select className={fieldInputClass} value={cityId} onChange={(e) => setCityId(e.target.value)} required>
-          <option value="" disabled>
-            Pilih kota
-          </option>
-          {cities.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+        <Select
+          value={cityId}
+          onChange={setCityId}
+          options={cities.map((c) => ({ value: c.id, label: c.name }))}
+          placeholder="Pilih kota"
+          ariaLabel="Kota"
+        />
       </FormField>
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Hari Meeting">
-          <select className={fieldInputClass} value={meetingDay} onChange={(e) => setMeetingDay(e.target.value)}>
-            {MEETING_DAYS.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+          <Select value={meetingDay} onChange={setMeetingDay} options={DAY_OPTIONS} ariaLabel="Hari meeting" />
         </FormField>
         <FormField label="Jam Meeting">
           <input type="time" className={fieldInputClass} value={meetingTime} onChange={(e) => setMeetingTime(e.target.value)} />
@@ -114,11 +112,12 @@ export function ChapterFormModal({ isOpen, initial, cities, onClose, onSubmit }:
           <input type="date" className={fieldInputClass} value={launchDate} onChange={(e) => setLaunchDate(e.target.value)} />
         </FormField>
         <FormField label="Status">
-          <select className={fieldInputClass} value={status} onChange={(e) => setStatus(e.target.value as ChapterStatus)}>
-            <option value="Active">Active</option>
-            <option value="Forming">Forming</option>
-            <option value="Inactive">Inactive</option>
-          </select>
+          <Select
+            value={status}
+            onChange={(v) => setStatus(v as ChapterStatus)}
+            options={STATUS_OPTIONS}
+            ariaLabel="Status chapter"
+          />
         </FormField>
       </div>
     </FormModal>
