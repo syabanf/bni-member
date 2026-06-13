@@ -12,6 +12,7 @@ const toInput = (m: Member): SaveMemberInput => ({
   id: m.id,
   name: m.name,
   email: m.email,
+  phone: m.phone,
   chapterId: m.chapterId,
   classification: m.classification,
   role: m.role,

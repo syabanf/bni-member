@@ -1,6 +1,6 @@
 import { getIcon, type IconName } from "@/presentation/config/icon-map";
 
-type ActionTone = "blue" | "danger";
+type ActionTone = "blue" | "danger" | "green";
 
 interface ActionCardProps {
   iconName: IconName;
@@ -14,6 +14,8 @@ const toneClasses: Record<ActionTone, string> = {
   blue: "bg-gradient-to-br from-blue-500/15 to-blue-500/5 text-blue-500 group-hover:from-blue-500 group-hover:to-blue-500 group-hover:text-white",
   danger:
     "bg-gradient-to-br from-danger/15 to-danger/5 text-danger group-hover:from-danger group-hover:to-danger group-hover:text-white",
+  green:
+    "bg-gradient-to-br from-success/15 to-success/5 text-success group-hover:from-success group-hover:to-success group-hover:text-white",
 };
 
 /** A clickable stat-card-styled button (e.g. "Kirim — Sent All Invoice"). */

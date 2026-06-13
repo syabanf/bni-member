@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Eye, Pencil, Trash2, ArrowUpRight } from "lucide-react";
+import { Eye, Pencil, Trash2, ArrowUpRight, MessageCircle } from "lucide-react";
 import type { PaymentRecord } from "@/domain/entities/Payment";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
@@ -11,6 +11,7 @@ import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteMo
 import { ViewMemberModal } from "./ViewMemberModal";
 import { formatDate, SHORT_DATE } from "@/presentation/utils/format";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
+import { waLink } from "@/presentation/utils/whatsapp";
 import { useToast } from "@/presentation/providers/ToastProvider";
 
 interface MemberTableProps {
@@ -18,12 +19,15 @@ interface MemberTableProps {
   title?: string;
   /** When set, renders a "Lihat semua" drill-down link in the header. */
   viewAllTo?: string;
+  /** When set, each row gets a WhatsApp reminder button using this autotext. */
+  waText?: (record: PaymentRecord) => string;
 }
 
 export function MemberTable({
   data,
   title = "Recent Member Activity",
   viewAllTo,
+  waText,
 }: MemberTableProps) {
   const [search, setSearch] = useState("");
   const [chapter, setChapter] = useState(ALL);
@@ -82,6 +86,18 @@ export function MemberTable({
       actions: true,
       cell: (r) => (
         <div className="flex items-center gap-1">
+          {waText && r.phone && (
+            <a
+              href={waLink(r.phone, waText(r))}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Ingatkan ${r.memberName} via WhatsApp`}
+              title="Ingatkan via WhatsApp"
+              className="p-1.5 rounded-lg text-gray-500 hover:bg-success/10 hover:text-success"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </a>
+          )}
           <IconButton label={`View ${r.memberName}`} onClick={() => view(r)}>
             <Eye className="w-4 h-4" />
           </IconButton>

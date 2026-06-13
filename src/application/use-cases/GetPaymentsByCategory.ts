@@ -23,6 +23,7 @@ export class GetPaymentsByCategory {
         memberId: m.id,
         memberName: m.name,
         email: m.email,
+        phone: m.phone,
         chapter: m.chapter,
         status: m.status,
         paymentStatus: m.status === "Active" ? "Paid" : "Awaiting",

@@ -13,6 +13,8 @@ export interface PaymentRecord {
   memberId: string;
   memberName: string;
   email?: string;
+  /** Mobile number for WhatsApp reminders (Indonesian format). */
+  phone?: string;
   chapter: string;
   status: MemberStatus;
   paymentStatus: PaymentStatus;

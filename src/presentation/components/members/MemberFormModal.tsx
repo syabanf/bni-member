@@ -48,6 +48,7 @@ export function MemberFormModal({
 }: MemberFormModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [chapterId, setChapterId] = useState("");
   const [classification, setClassification] = useState("");
   const [role, setRole] = useState<MemberRole>("Member");
@@ -64,6 +65,7 @@ export function MemberFormModal({
     if (!isOpen) return;
     setName(initial?.name ?? "");
     setEmail(initial?.email ?? "");
+    setPhone(initial?.phone ?? "");
     setChapterId(initial?.chapterId ?? chapters[0]?.id ?? "");
     setClassification(initial?.classification ?? "");
     setRole(initial?.role ?? "Member");
@@ -84,6 +86,7 @@ export function MemberFormModal({
         id: initial?.id,
         name: name.trim(),
         email: email.trim(),
+        phone: phone.trim() || undefined,
         chapterId,
         classification: classification.trim(),
         role,
@@ -124,6 +127,16 @@ export function MemberFormModal({
           <input type="email" className={fieldInputClass} value={email} onChange={(e) => setEmail(e.target.value)} required />
         </FormField>
       </div>
+
+      <FormField label="No. WhatsApp">
+        <input
+          className={fieldInputClass}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="08xxxxxxxxxx"
+          inputMode="tel"
+        />
+      </FormField>
 
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Chapter" required>

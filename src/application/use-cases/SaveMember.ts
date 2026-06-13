@@ -7,6 +7,7 @@ export interface SaveMemberInput {
   id?: string;
   name: string;
   email: string;
+  phone?: string;
   chapterId: string;
   classification: string;
   role: MemberRole;

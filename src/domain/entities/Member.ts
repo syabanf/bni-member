@@ -18,6 +18,8 @@ export interface Member {
   id: string;
   name: string;
   email: string;
+  /** Mobile number (Indonesian format, e.g. "08123456789") for WhatsApp reminders. */
+  phone?: string;
   /** Denormalised chapter name (for display); source of truth is chapterId. */
   chapter: string;
   chapterId: string; // FK -> Chapter

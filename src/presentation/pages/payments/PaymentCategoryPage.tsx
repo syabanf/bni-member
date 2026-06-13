@@ -6,8 +6,9 @@ import { useAsync } from "@/presentation/hooks/useAsync";
 import { StatCard } from "@/presentation/components/ui/StatCard";
 import { ActionCard } from "@/presentation/components/ui/ActionCard";
 import { MemberTable } from "@/presentation/components/dashboard/MemberTable";
-import { SendConfirmModal } from "@/presentation/components/ui/SendConfirmModal";
+import { SendConfirmModal, type SendRecipient } from "@/presentation/components/ui/SendConfirmModal";
 import { SuccessModal } from "@/presentation/components/ui/SuccessModal";
+import { reminderText } from "@/presentation/utils/whatsapp";
 
 interface CategoryConfig {
   stat: {
@@ -71,6 +72,7 @@ export function PaymentCategoryPage({ category }: PaymentCategoryPageProps) {
   const { data: summary } = useAsync(() => getPaymentSummary.execute(), []);
 
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showWa, setShowWa] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [sending, setSending] = useState(false);
 
@@ -79,7 +81,12 @@ export function PaymentCategoryPage({ category }: PaymentCategoryPageProps) {
     id: r.id,
     name: r.memberName,
     email: r.email,
+    phone: r.phone,
   }));
+  const waMessage = (r: SendRecipient) => {
+    const rec = items.find((x) => x.id === r.id);
+    return reminderText(category, { name: r.name, chapter: rec?.chapter ?? "", amount: rec?.amount });
+  };
 
   const handleConfirm = async () => {
     setSending(true);
@@ -107,9 +114,22 @@ export function PaymentCategoryPage({ category }: PaymentCategoryPageProps) {
           tone={cfg.action.tone}
           onClick={() => setShowConfirm(true)}
         />
+        <ActionCard
+          iconName="MessageCircle"
+          title="WhatsApp"
+          subtitle="Reminder via WA"
+          tone="green"
+          onClick={() => setShowWa(true)}
+        />
       </div>
 
-      <MemberTable data={items} title={cfg.tableTitle} />
+      <MemberTable
+        data={items}
+        title={cfg.tableTitle}
+        waText={(rec) =>
+          reminderText(category, { name: rec.memberName, chapter: rec.chapter, amount: rec.amount })
+        }
+      />
 
       <SendConfirmModal
         isOpen={showConfirm}
@@ -120,6 +140,17 @@ export function PaymentCategoryPage({ category }: PaymentCategoryPageProps) {
         sending={sending}
         onCancel={() => setShowConfirm(false)}
         onConfirm={handleConfirm}
+      />
+      <SendConfirmModal
+        isOpen={showWa}
+        title={`Reminder WhatsApp — ${cfg.tableTitle}`}
+        noun="reminder"
+        channel="whatsapp"
+        recipients={recipients}
+        waText={waMessage}
+        sending={false}
+        onCancel={() => setShowWa(false)}
+        onConfirm={() => setShowWa(false)}
       />
       <SuccessModal
         isOpen={showSuccess}
