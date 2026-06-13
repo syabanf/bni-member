@@ -13,6 +13,8 @@ import { MemberFormModal } from "@/presentation/components/members/MemberFormMod
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 import { MemberDetailModal } from "@/presentation/components/members/MemberDetailModal";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
+import { exportToCsv } from "@/presentation/utils/csv";
+import { useToast } from "@/presentation/providers/ToastProvider";
 
 const STATUS_OPTIONS: FilterOption[] = ["All", "Active", "Pending", "Overdue", "Expired"].map(
   (s) => ({ value: s, label: s === "All" ? "All Status" : s }),
@@ -20,6 +22,7 @@ const STATUS_OPTIONS: FilterOption[] = ["All", "Active", "Pending", "Overdue", "
 
 export function AllMembersPage() {
   const { getMembers, listChapters, saveMember, deleteMember } = useServices();
+  const toast = useToast();
 
   const [search, setSearch] = useState("");
   const [chapter, setChapter] = useState(ALL);
@@ -75,6 +78,20 @@ export function AllMembersPage() {
     }
   };
 
+  const handleExport = () => {
+    exportToCsv("members.csv", rows, [
+      { header: "Nama", value: (m) => m.name },
+      { header: "Email", value: (m) => m.email },
+      { header: "Chapter", value: (m) => m.chapter },
+      { header: "Klasifikasi", value: (m) => m.classification },
+      { header: "Role", value: (m) => m.role },
+      { header: "Status", value: (m) => m.status },
+      { header: "Tanggal Gabung", value: (m) => m.joinDate },
+      { header: "Paket", value: (m) => m.subscription },
+    ]);
+    toast(`${rows.length} member diekspor ke CSV`);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -119,7 +136,10 @@ export function AllMembersPage() {
           ariaLabel="Filter by status"
           options={STATUS_OPTIONS}
         />
-        <button className="flex items-center justify-center gap-2 border border-gray-200 px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+        <button
+          onClick={handleExport}
+          className="flex items-center justify-center gap-2 border border-gray-200 px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+        >
           <Download className="w-4 h-4" />
           Export
         </button>
@@ -161,20 +181,8 @@ export function AllMembersPage() {
             </button>
           </div>
         )}
+        pageSize={10}
       />
-
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 px-5 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <span className="text-sm text-gray-500">
-          Showing {rows.length} of {total} members
-        </span>
-        <div className="flex gap-1">
-          <button className="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50" disabled>
-            Previous
-          </button>
-          <button className="px-3 py-1 text-sm bg-bni-primary text-white rounded-lg">1</button>
-          <button className="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50">Next</button>
-        </div>
-      </div>
 
       <MemberFormModal
         isOpen={formOpen}

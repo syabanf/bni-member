@@ -8,11 +8,13 @@ import {
   AlertTriangle,
   Link2,
 } from "lucide-react";
+import { useToast } from "@/presentation/providers/ToastProvider";
 
 export function PaperIdPage() {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [lastSync, setLastSync] = useState<string>("Never");
+  const toast = useToast();
 
   const checkConnection = () => {
     setIsChecking(true);
@@ -192,14 +194,27 @@ export function PaperIdPage() {
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-900">API Key</span>
-              <button className="text-xs text-bni-primary hover:underline">Edit</button>
+              <button
+                onClick={() => toast("Konfigurasi API Key belum tersedia", "info")}
+                className="text-xs text-bni-primary hover:underline"
+              >
+                Edit
+              </button>
             </div>
             <code className="text-sm text-gray-600">••••••••••••••••••••••••••••••</code>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-900">Webhook URL</span>
-              <button className="text-xs text-bni-primary hover:underline">Copy</button>
+              <button
+                onClick={() => {
+                  void navigator.clipboard?.writeText("https://bnipayment.com/api/webhooks/paperid");
+                  toast("Webhook URL disalin");
+                }}
+                className="text-xs text-bni-primary hover:underline"
+              >
+                Copy
+              </button>
             </div>
             <code className="text-sm text-gray-600">https://bnipayment.com/api/webhooks/paperid</code>
           </div>

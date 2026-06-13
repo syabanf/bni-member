@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Search, Bell, ChevronDown, Menu, User, LogOut } from "lucide-react";
 import { getPageTitle } from "@/presentation/config/navigation";
 import { useAuth } from "@/presentation/auth/AuthProvider";
+import { useToast } from "@/presentation/providers/ToastProvider";
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -12,6 +13,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const toast = useToast();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const title = getPageTitle(pathname);
 
@@ -52,6 +54,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           </div>
 
           <button
+            onClick={() => toast("Tidak ada notifikasi baru", "info")}
             aria-label="Notifikasi"
             className="relative p-2.5 hover:bg-gray-100 rounded-xl text-gray-600"
           >
@@ -93,7 +96,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                       </span>
                     )}
                   </div>
-                  <button className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      toast("Halaman profil belum tersedia", "info");
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
                     <User className="w-4 h-4 text-gray-400" />
                     Profile
                   </button>

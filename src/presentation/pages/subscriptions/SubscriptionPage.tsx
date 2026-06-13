@@ -13,11 +13,16 @@ import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { IconButton } from "@/presentation/components/ui/IconButton";
 import { formatCurrency, formatDate } from "@/presentation/utils/format";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
+import { exportToCsv } from "@/presentation/utils/csv";
+import { useToast } from "@/presentation/providers/ToastProvider";
+import { MemberDetailModal } from "@/presentation/components/members/MemberDetailModal";
 
 export function SubscriptionPage() {
   const { getSubscriptions, getMembers } = useServices();
+  const toast = useToast();
   const [search, setSearch] = useState("");
   const [chapterFilter, setChapterFilter] = useState(ALL);
+  const [detailMemberId, setDetailMemberId] = useState<string | null>(null);
   const { data } = useAsync(() => getSubscriptions.execute(search), [search]);
   const { data: allSubs } = useAsync(() => getSubscriptions.execute(""), []);
   const { data: memberData } = useAsync(() => getMembers.execute({}), []);
@@ -27,6 +32,19 @@ export function SubscriptionPage() {
   const rows = (data ?? []).filter(
     (s) => chapterFilter === ALL || memberChapter.get(s.memberId) === chapterFilter,
   );
+
+  const handleExport = () => {
+    exportToCsv("subscriptions.csv", rows, [
+      { header: "Member", value: (s) => s.memberName },
+      { header: "Chapter", value: (s) => memberChapter.get(s.memberId) ?? "" },
+      { header: "Paket", value: (s) => s.plan },
+      { header: "Nilai", value: (s) => s.amount },
+      { header: "Mulai", value: (s) => s.startDate },
+      { header: "Berakhir", value: (s) => s.endDate },
+      { header: "Status", value: (s) => s.status },
+    ]);
+    toast(`${rows.length} langganan diekspor ke CSV`);
+  };
 
   const columns: Column<Subscription>[] = [
     {
@@ -55,12 +73,15 @@ export function SubscriptionPage() {
       key: "actions",
       header: "Actions",
       actions: true,
-      cell: () => (
+      cell: (s) => (
         <div className="flex items-center gap-1">
-          <IconButton label="View">
+          <IconButton label="Lihat member" onClick={() => setDetailMemberId(s.memberId)}>
             <Eye className="w-4 h-4" />
           </IconButton>
-          <IconButton label="Edit">
+          <IconButton
+            label="Edit langganan"
+            onClick={() => toast("Langganan dikelola dari paket di data member", "info")}
+          >
             <Pencil className="w-4 h-4" />
           </IconButton>
         </div>
@@ -73,7 +94,10 @@ export function SubscriptionPage() {
       <PageHeader
         title="Subscription Data"
         actions={
-          <button className="flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium">
+          <button
+            onClick={() => toast("Langganan dibuat otomatis saat menambah member dengan paket", "info")}
+            className="flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
             <Plus className="w-4 h-4" />
             New Subscription
           </button>
@@ -102,7 +126,10 @@ export function SubscriptionPage() {
           ariaLabel="Filter by chapter"
           options={chapterFilterOptions((memberData ?? []).map((m) => m.chapter))}
         />
-        <button className="flex items-center justify-center gap-2 border border-gray-200 px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
+        <button
+          onClick={handleExport}
+          className="flex items-center justify-center gap-2 border border-gray-200 px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+        >
           <Download className="w-4 h-4" />
           Export
         </button>
@@ -114,6 +141,10 @@ export function SubscriptionPage() {
         rowKey={(s) => s.id}
         emptyText="No subscriptions found"
       />
+
+      {detailMemberId && (
+        <MemberDetailModal memberId={detailMemberId} onClose={() => setDetailMemberId(null)} />
+      )}
     </div>
   );
 }

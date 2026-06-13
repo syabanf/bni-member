@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 export interface Column<T> {
   key: string;
@@ -26,6 +26,8 @@ interface DataTableProps<T> {
   header?: ReactNode;
   /** Optional content rendered below the table, inside the card. */
   footer?: ReactNode;
+  /** When set, rows are paginated client-side (after sorting) with a pager. */
+  pageSize?: number;
 }
 
 type SortState = { key: string; dir: "asc" | "desc" } | null;
@@ -55,8 +57,10 @@ export function DataTable<T>({
   emptyText = "Tidak ada data",
   header,
   footer,
+  pageSize,
 }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState>(null);
+  const [page, setPage] = useState(1);
 
   const sortCol = sort ? columns.find((c) => c.key === sort.key) : undefined;
   const sorted = useMemo(() => {
@@ -72,6 +76,10 @@ export function DataTable<T>({
       if (cur.dir === "asc") return { key, dir: "desc" };
       return null;
     });
+
+  const pageCount = pageSize ? Math.max(1, Math.ceil(sorted.length / pageSize)) : 1;
+  const current = Math.min(page, pageCount);
+  const visible = pageSize ? sorted.slice((current - 1) * pageSize, current * pageSize) : sorted;
 
   const primaryCols = columns.filter((c) => c.primary);
   const actionCols = columns.filter((c) => c.actions);
@@ -129,7 +137,7 @@ export function DataTable<T>({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {sorted.map((row) => (
+                {visible.map((row) => (
                   <tr key={rowKey(row)} className="hover:bg-gray-50/70 transition-colors">
                     {columns.map((c) => (
                       <td
@@ -149,7 +157,7 @@ export function DataTable<T>({
 
           {/* Mobile cards */}
           <div className="md:hidden divide-y divide-gray-100">
-            {sorted.map((row) => (
+            {visible.map((row) => (
               <div key={rowKey(row)} className="p-4">
                 {primaryCols.length > 0 && (
                   <div className="mb-3">
@@ -180,6 +188,37 @@ export function DataTable<T>({
               </div>
             ))}
           </div>
+
+          {pageSize && (
+            <div className="flex items-center justify-between gap-4 px-5 py-3.5 border-t border-gray-100 text-sm">
+              <span className="text-gray-500">
+                {(current - 1) * pageSize + 1}–{Math.min(current * pageSize, sorted.length)} dari {sorted.length}
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setPage(current - 1)}
+                  disabled={current <= 1}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Prev
+                </button>
+                <span className="px-3 text-gray-500">
+                  Hal {current}/{pageCount}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage(current + 1)}
+                  disabled={current >= pageCount}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
 

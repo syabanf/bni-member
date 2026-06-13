@@ -9,11 +9,15 @@ import { SearchInput } from "@/presentation/components/ui/SearchInput";
 import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { MembersTable } from "@/presentation/components/members/MembersTable";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
+import { useMemberActions } from "@/presentation/hooks/useMemberActions";
 
 export function NewMembersPage() {
   const { getMembersByStatus } = useServices();
-  const { data } = useAsync(() => getMembersByStatus.execute(["Pending"]), []);
+  const [refresh, setRefresh] = useState(0);
+  const bump = () => setRefresh((r) => r + 1);
+  const { data } = useAsync(() => getMembersByStatus.execute(["Pending"]), [refresh]);
   const all = data ?? [];
+  const actions = useMemberActions(bump);
   const [search, setSearch] = useState("");
   const [chapter, setChapter] = useState(ALL);
   const q = search.toLowerCase();
@@ -28,7 +32,10 @@ export function NewMembersPage() {
       <PageHeader
         title="New Member"
         actions={
-          <button className="flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium">
+          <button
+            onClick={actions.openCreate}
+            className="flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium"
+          >
             <UserPlus className="w-4 h-4" />
             Add New Member
           </button>
@@ -62,17 +69,31 @@ export function NewMembersPage() {
       <MembersTable
         members={rows}
         emptyText="No new members found"
-        renderActions={() => (
+        renderActions={(m) => (
           <div className="flex gap-2">
-            <button className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
+            <button
+              onClick={() => actions.setStatus(m, "Active", "disetujui & diaktifkan")}
+              className="flex-1 md:flex-none px-3 py-1 text-xs rounded-lg bg-success/10 text-success hover:bg-success/20 font-medium"
+            >
               Approve
             </button>
-            <button className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
+            <button
+              onClick={() => actions.openEdit(m)}
+              className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
               Edit
+            </button>
+            <button
+              onClick={() => actions.askDelete(m)}
+              className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-danger hover:bg-red-50"
+            >
+              Delete
             </button>
           </div>
         )}
       />
+
+      {actions.modals}
     </div>
   );
 }

@@ -6,6 +6,8 @@ import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHeader } from "@/presentation/components/ui/PageHeader";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { IconButton } from "@/presentation/components/ui/IconButton";
+import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
+import { useToast } from "@/presentation/providers/ToastProvider";
 
 const TEMPLATE_CSV = [
   "Name,Email,Chapter,Phone,Address",
@@ -21,8 +23,18 @@ type UploadStatus = "idle" | "success" | "error";
 
 export function ImportExportPage() {
   const { getImportPreview } = useServices();
+  const toast = useToast();
   const { data: preview } = useAsync(() => getImportPreview.execute(), []);
-  const rows = preview ?? [];
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<ImportRecord | null>(null);
+  const rows = (preview ?? []).filter((r) => !removedIds.includes(r.id));
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    setRemovedIds((ids) => [...ids, deleteTarget.id]);
+    toast(`${deleteTarget.name} dihapus dari daftar import`);
+    setDeleteTarget(null);
+  };
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
@@ -85,10 +97,13 @@ export function ImportExportPage() {
       actions: true,
       cell: (d) => (
         <div className="flex items-center gap-1">
-          <IconButton label={`View ${d.name}`}>
+          <IconButton
+            label={`View ${d.name}`}
+            onClick={() => toast(`${d.name} · ${d.email} · ${d.chapter}`, "info")}
+          >
             <Eye className="w-4 h-4" />
           </IconButton>
-          <IconButton label={`Delete ${d.name}`} tone="danger">
+          <IconButton label={`Delete ${d.name}`} tone="danger" onClick={() => setDeleteTarget(d)}>
             <Trash2 className="w-4 h-4" />
           </IconButton>
         </div>
@@ -168,6 +183,15 @@ export function ImportExportPage() {
             </p>
           </div>
         }
+      />
+
+      <ConfirmDeleteModal
+        isOpen={!!deleteTarget}
+        title="Hapus Data Import"
+        message={`Hapus "${deleteTarget?.name}" dari daftar import?`}
+        deleting={false}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
       />
     </div>
   );

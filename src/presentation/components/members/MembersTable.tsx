@@ -19,6 +19,8 @@ interface MembersTableProps {
   /** When provided, an "Actions" column is rendered. */
   renderActions?: (member: Member) => ReactNode;
   emptyText?: string;
+  /** Forwarded to DataTable to paginate client-side. */
+  pageSize?: number;
 }
 
 const avatarClasses = {
@@ -32,6 +34,7 @@ export function MembersTable({
   extraColumns = [],
   renderActions,
   emptyText = "No members found",
+  pageSize,
 }: MembersTableProps) {
   const avatarClass = avatarClasses[avatar];
 
@@ -68,6 +71,12 @@ export function MembersTable({
   ];
 
   return (
-    <DataTable columns={columns} rows={members} rowKey={(m) => m.id} emptyText={emptyText} />
+    <DataTable
+      columns={columns}
+      rows={members}
+      rowKey={(m) => m.id}
+      emptyText={emptyText}
+      pageSize={pageSize}
+    />
   );
 }

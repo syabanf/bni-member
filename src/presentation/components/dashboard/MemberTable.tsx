@@ -7,9 +7,11 @@ import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { SearchInput } from "@/presentation/components/ui/SearchInput";
 import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { IconButton } from "@/presentation/components/ui/IconButton";
+import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 import { ViewMemberModal } from "./ViewMemberModal";
 import { formatDate, SHORT_DATE } from "@/presentation/utils/format";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
+import { useToast } from "@/presentation/providers/ToastProvider";
 
 interface MemberTableProps {
   data: PaymentRecord[];
@@ -27,14 +29,25 @@ export function MemberTable({
   const [chapter, setChapter] = useState(ALL);
   const [selected, setSelected] = useState<PaymentRecord | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [removedIds, setRemovedIds] = useState<string[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<PaymentRecord | null>(null);
+  const toast = useToast();
 
   const filtered = data.filter(
     (r) =>
+      !removedIds.includes(r.id) &&
       (chapter === ALL || r.chapter === chapter) &&
       (r.memberName.toLowerCase().includes(search.toLowerCase()) ||
         r.chapter.toLowerCase().includes(search.toLowerCase()) ||
         r.status.toLowerCase().includes(search.toLowerCase())),
   );
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    setRemovedIds((ids) => [...ids, deleteTarget.id]);
+    toast(`Data ${deleteTarget.memberName} dihapus`);
+    setDeleteTarget(null);
+  };
 
   const view = (record: PaymentRecord) => {
     setSelected(record);
@@ -72,10 +85,13 @@ export function MemberTable({
           <IconButton label={`View ${r.memberName}`} onClick={() => view(r)}>
             <Eye className="w-4 h-4" />
           </IconButton>
-          <IconButton label={`Edit ${r.memberName}`}>
+          <IconButton
+            label={`Edit ${r.memberName}`}
+            onClick={() => toast("Edit data pembayaran belum tersedia", "info")}
+          >
             <Pencil className="w-4 h-4" />
           </IconButton>
-          <IconButton label={`Delete ${r.memberName}`} tone="danger">
+          <IconButton label={`Delete ${r.memberName}`} tone="danger" onClick={() => setDeleteTarget(r)}>
             <Trash2 className="w-4 h-4" />
           </IconButton>
         </div>
@@ -133,6 +149,14 @@ export function MemberTable({
           setIsOpen(false);
           setSelected(null);
         }}
+      />
+      <ConfirmDeleteModal
+        isOpen={!!deleteTarget}
+        title="Hapus Data"
+        message={`Hapus data pembayaran "${deleteTarget?.memberName}"?`}
+        deleting={false}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
       />
     </>
   );

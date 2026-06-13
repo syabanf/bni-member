@@ -8,11 +8,15 @@ import { SearchInput } from "@/presentation/components/ui/SearchInput";
 import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { MembersTable } from "@/presentation/components/members/MembersTable";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
+import { useMemberActions } from "@/presentation/hooks/useMemberActions";
 
 export function NeedRenewalPage() {
   const { getMembersByStatus } = useServices();
-  const { data } = useAsync(() => getMembersByStatus.execute(["Active", "Pending"]), []);
+  const [refresh, setRefresh] = useState(0);
+  const bump = () => setRefresh((r) => r + 1);
+  const { data } = useAsync(() => getMembersByStatus.execute(["Active", "Pending"]), [refresh]);
   const all = data ?? [];
+  const actions = useMemberActions(bump);
   const [search, setSearch] = useState("");
   const [chapter, setChapter] = useState(ALL);
   const q = search.toLowerCase();
@@ -63,7 +67,31 @@ export function NeedRenewalPage() {
             ),
           },
         ]}
+        renderActions={(m) => (
+          <div className="flex gap-2">
+            <button
+              onClick={() => actions.setStatus(m, "Active", "diperpanjang & diaktifkan")}
+              className="flex-1 md:flex-none px-3 py-1 text-xs rounded-lg bg-bni-primary/10 text-bni-primary hover:bg-bni-primary/20 font-medium"
+            >
+              Renew
+            </button>
+            <button
+              onClick={() => actions.openDetail(m)}
+              className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
+              View
+            </button>
+            <button
+              onClick={() => actions.openEdit(m)}
+              className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
+              Edit
+            </button>
+          </div>
+        )}
       />
+
+      {actions.modals}
     </div>
   );
 }

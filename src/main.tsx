@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "@/presentation/App";
 import { ServicesProvider } from "@/presentation/providers/ServicesProvider";
 import { AuthProvider } from "@/presentation/auth/AuthProvider";
+import { ToastProvider } from "@/presentation/providers/ToastProvider";
 import "@/presentation/styles/globals.css";
 
 const rootElement = document.getElementById("root");
@@ -15,11 +16,13 @@ createRoot(rootElement).render(
   <StrictMode>
     <ServicesProvider>
       <AuthProvider>
-        <BrowserRouter
-          future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
-        >
-          <App />
-        </BrowserRouter>
+        <ToastProvider>
+          <BrowserRouter
+            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+          >
+            <App />
+          </BrowserRouter>
+        </ToastProvider>
       </AuthProvider>
     </ServicesProvider>
   </StrictMode>,

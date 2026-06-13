@@ -10,6 +10,7 @@ import {
   Clock,
   Link2,
 } from "lucide-react";
+import { useToast } from "@/presentation/providers/ToastProvider";
 
 const SYNC_TABS = [
   { id: "messaging", label: "Messaging", icon: MessageSquare },
@@ -31,6 +32,7 @@ export function LarkPage() {
   const [isChecking, setIsChecking] = useState(false);
   const [lastSync, setLastSync] = useState<string>("Never");
   const [activeTab, setActiveTab] = useState<string>("messaging");
+  const toast = useToast();
 
   const checkConnection = () => {
     setIsChecking(true);
@@ -273,21 +275,39 @@ export function LarkPage() {
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-900">App ID</span>
-              <button className="text-xs text-bni-primary hover:underline">Edit</button>
+              <button
+                onClick={() => toast("Konfigurasi kredensial belum tersedia", "info")}
+                className="text-xs text-bni-primary hover:underline"
+              >
+                Edit
+              </button>
             </div>
             <code className="text-sm text-gray-600">cli_1234567890abcdef</code>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-900">App Secret</span>
-              <button className="text-xs text-bni-primary hover:underline">Edit</button>
+              <button
+                onClick={() => toast("Konfigurasi kredensial belum tersedia", "info")}
+                className="text-xs text-bni-primary hover:underline"
+              >
+                Edit
+              </button>
             </div>
             <code className="text-sm text-gray-600">••••••••••••••••••••••••</code>
           </div>
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-900">Webhook URL</span>
-              <button className="text-xs text-bni-primary hover:underline">Copy</button>
+              <button
+                onClick={() => {
+                  void navigator.clipboard?.writeText("https://bnipayment.com/api/webhooks/lark");
+                  toast("Webhook URL disalin");
+                }}
+                className="text-xs text-bni-primary hover:underline"
+              >
+                Copy
+              </button>
             </div>
             <code className="text-sm text-gray-600">https://bnipayment.com/api/webhooks/lark</code>
           </div>

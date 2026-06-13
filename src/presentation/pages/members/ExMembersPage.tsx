@@ -8,11 +8,15 @@ import { SearchInput } from "@/presentation/components/ui/SearchInput";
 import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { MembersTable } from "@/presentation/components/members/MembersTable";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
+import { useMemberActions } from "@/presentation/hooks/useMemberActions";
 
 export function ExMembersPage() {
   const { getMembersByStatus } = useServices();
-  const { data } = useAsync(() => getMembersByStatus.execute(["Expired"]), []);
+  const [refresh, setRefresh] = useState(0);
+  const bump = () => setRefresh((r) => r + 1);
+  const { data } = useAsync(() => getMembersByStatus.execute(["Expired"]), [refresh]);
   const all = data ?? [];
+  const actions = useMemberActions(bump);
   const [search, setSearch] = useState("");
   const [chapter, setChapter] = useState(ALL);
   const q = search.toLowerCase();
@@ -54,17 +58,31 @@ export function ExMembersPage() {
         members={rows}
         avatar="muted"
         emptyText="No ex-members found"
-        renderActions={() => (
+        renderActions={(m) => (
           <div className="flex gap-2">
-            <button className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
+            <button
+              onClick={() => actions.setStatus(m, "Active", "dipulihkan & diaktifkan")}
+              className="flex-1 md:flex-none px-3 py-1 text-xs rounded-lg bg-success/10 text-success hover:bg-success/20 font-medium"
+            >
               Restore
             </button>
-            <button className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50">
+            <button
+              onClick={() => actions.openDetail(m)}
+              className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+            >
               View
+            </button>
+            <button
+              onClick={() => actions.askDelete(m)}
+              className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-danger hover:bg-red-50"
+            >
+              Delete
             </button>
           </div>
         )}
       />
+
+      {actions.modals}
     </div>
   );
 }
