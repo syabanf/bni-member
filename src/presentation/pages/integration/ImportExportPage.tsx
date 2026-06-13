@@ -54,6 +54,7 @@ export function ImportExportPage() {
       key: "name",
       header: "Name",
       primary: true,
+      sortValue: (d) => d.name,
       cell: (d) => (
         <div>
           <p className="text-sm font-medium text-gray-900">{d.name}</p>
@@ -61,11 +62,12 @@ export function ImportExportPage() {
         </div>
       ),
     },
-    { key: "email", header: "Email", cell: (d) => d.email },
-    { key: "chapter", header: "Chapter", cell: (d) => d.chapter },
+    { key: "email", header: "Email", sortValue: (d) => d.email, cell: (d) => d.email },
+    { key: "chapter", header: "Chapter", sortValue: (d) => d.chapter, cell: (d) => d.chapter },
     {
       key: "status",
       header: "Status",
+      sortValue: (d) => d.status,
       cell: (d) => (
         <span
           className={`px-2.5 py-1 text-xs rounded-full ${
@@ -76,7 +78,7 @@ export function ImportExportPage() {
         </span>
       ),
     },
-    { key: "renewal", header: "Tanggal Renewal", cell: (d) => d.renewalDate },
+    { key: "renewal", header: "Tanggal Renewal", sortValue: (d) => d.renewalDate, cell: (d) => d.renewalDate },
     {
       key: "actions",
       header: "Actions",

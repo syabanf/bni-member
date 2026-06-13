@@ -5,9 +5,11 @@ import type { PaymentRecord } from "@/domain/entities/Payment";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { SearchInput } from "@/presentation/components/ui/SearchInput";
+import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { IconButton } from "@/presentation/components/ui/IconButton";
 import { ViewMemberModal } from "./ViewMemberModal";
 import { formatDate, SHORT_DATE } from "@/presentation/utils/format";
+import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
 
 interface MemberTableProps {
   data: PaymentRecord[];
@@ -22,14 +24,16 @@ export function MemberTable({
   viewAllTo,
 }: MemberTableProps) {
   const [search, setSearch] = useState("");
+  const [chapter, setChapter] = useState(ALL);
   const [selected, setSelected] = useState<PaymentRecord | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
   const filtered = data.filter(
     (r) =>
-      r.memberName.toLowerCase().includes(search.toLowerCase()) ||
-      r.chapter.toLowerCase().includes(search.toLowerCase()) ||
-      r.status.toLowerCase().includes(search.toLowerCase()),
+      (chapter === ALL || r.chapter === chapter) &&
+      (r.memberName.toLowerCase().includes(search.toLowerCase()) ||
+        r.chapter.toLowerCase().includes(search.toLowerCase()) ||
+        r.status.toLowerCase().includes(search.toLowerCase())),
   );
 
   const view = (record: PaymentRecord) => {
@@ -42,6 +46,7 @@ export function MemberTable({
       key: "name",
       header: "Name",
       primary: true,
+      sortValue: (r) => r.memberName,
       cell: (r) => (
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-bni-primary/10 flex items-center justify-center text-bni-primary text-sm font-medium">
@@ -54,10 +59,10 @@ export function MemberTable({
         </div>
       ),
     },
-    { key: "chapter", header: "Chapter", cell: (r) => r.chapter },
-    { key: "status", header: "Status", cell: (r) => <StatusBadge status={r.status} /> },
-    { key: "payment", header: "Payment", cell: (r) => <StatusBadge status={r.paymentStatus} /> },
-    { key: "date", header: "Date", cell: (r) => formatDate(r.date, SHORT_DATE) },
+    { key: "chapter", header: "Chapter", sortValue: (r) => r.chapter, cell: (r) => r.chapter },
+    { key: "status", header: "Status", sortValue: (r) => r.status, cell: (r) => <StatusBadge status={r.status} /> },
+    { key: "payment", header: "Payment", sortValue: (r) => r.paymentStatus, cell: (r) => <StatusBadge status={r.paymentStatus} /> },
+    { key: "date", header: "Date", sortValue: (r) => r.date, cell: (r) => formatDate(r.date, SHORT_DATE) },
     {
       key: "actions",
       header: "Actions",
@@ -99,12 +104,20 @@ export function MemberTable({
                 </Link>
               )}
             </div>
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              ariaLabel="Search records"
-              className="w-full sm:w-64"
-            />
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                ariaLabel="Search records"
+                className="w-full sm:w-56"
+              />
+              <FilterSelect
+                value={chapter}
+                onChange={setChapter}
+                ariaLabel="Filter by chapter"
+                options={chapterFilterOptions(data.map((r) => r.chapter))}
+              />
+            </div>
           </div>
         }
         footer={

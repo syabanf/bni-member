@@ -8,7 +8,9 @@ import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
 import { FilterBar } from "@/presentation/components/ui/FilterBar";
 import { SearchInput } from "@/presentation/components/ui/SearchInput";
+import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { formatCurrency } from "@/presentation/utils/format";
+import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
 
 const ghostBtn =
   "flex items-center gap-2 border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium";
@@ -33,8 +35,13 @@ export function PerformancePage() {
   const list = data ?? [];
   const ranked: Ranked[] = list.map((e, i) => ({ ...e, rank: i + 1 }));
   const [search, setSearch] = useState("");
+  const [chapterFilter, setChapterFilter] = useState(ALL);
   const q = search.toLowerCase();
-  const rows = ranked.filter((e) => e.member.name.toLowerCase().includes(q));
+  const rows = ranked.filter(
+    (e) =>
+      (chapterFilter === ALL || e.member.chapter === chapterFilter) &&
+      e.member.name.toLowerCase().includes(q),
+  );
   const totalTyfcb = list.reduce((s, e) => s + e.tyfcb, 0);
   const totalReferral = list.reduce((s, e) => s + e.referralsGiven, 0);
   const totalVisitor = list.reduce((s, e) => s + e.visitorsBrought, 0);
@@ -43,6 +50,7 @@ export function PerformancePage() {
     {
       key: "rank",
       header: "#",
+      sortValue: (e) => e.rank,
       cell: (e) => (
         <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${rankClass(e.rank)}`}>
           {e.rank}
@@ -53,6 +61,7 @@ export function PerformancePage() {
       key: "member",
       header: "Member",
       primary: true,
+      sortValue: (e) => e.member.name,
       cell: (e) => (
         <div>
           <p className="text-sm font-medium text-gray-900">{e.member.name}</p>
@@ -60,13 +69,14 @@ export function PerformancePage() {
         </div>
       ),
     },
-    { key: "given", header: "Referral Given", cell: (e) => e.referralsGiven },
-    { key: "received", header: "Referral Received", cell: (e) => e.referralsReceived },
-    { key: "visitor", header: "Visitor", cell: (e) => e.visitorsBrought },
+    { key: "given", header: "Referral Given", sortValue: (e) => e.referralsGiven, cell: (e) => e.referralsGiven },
+    { key: "received", header: "Referral Received", sortValue: (e) => e.referralsReceived, cell: (e) => e.referralsReceived },
+    { key: "visitor", header: "Visitor", sortValue: (e) => e.visitorsBrought, cell: (e) => e.visitorsBrought },
     {
       key: "tyfcb",
       header: "TYFCB",
       align: "right",
+      sortValue: (e) => e.tyfcb,
       cell: (e) => <span className="font-medium text-gray-900">{formatCurrency(e.tyfcb)}</span>,
     },
   ];
@@ -100,6 +110,12 @@ export function PerformancePage() {
           placeholder="Cari member..."
           ariaLabel="Cari member"
           className="flex-1"
+        />
+        <FilterSelect
+          value={chapterFilter}
+          onChange={setChapterFilter}
+          ariaLabel="Filter by chapter"
+          options={chapterFilterOptions(list.map((e) => e.member.chapter))}
         />
       </FilterBar>
 

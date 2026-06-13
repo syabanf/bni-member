@@ -65,6 +65,7 @@ export function ChaptersPage() {
       key: "name",
       header: "Chapter",
       primary: true,
+      sortValue: ({ chapter }) => chapter.name,
       cell: ({ chapter, cityName }) => (
         <div>
           <p className="text-sm font-medium text-gray-900">{chapter.name}</p>
@@ -77,10 +78,11 @@ export function ChaptersPage() {
     {
       key: "meeting",
       header: "Meeting",
+      sortValue: ({ chapter }) => chapter.meetingDay,
       cell: ({ chapter }) => `${chapter.meetingDay}, ${chapter.meetingTime}`,
     },
-    { key: "members", header: "Member", cell: (c) => c.memberCount },
-    { key: "status", header: "Status", cell: ({ chapter }) => <StatusBadge status={chapter.status} /> },
+    { key: "members", header: "Member", sortValue: (c) => c.memberCount, cell: (c) => c.memberCount },
+    { key: "status", header: "Status", sortValue: ({ chapter }) => chapter.status, cell: ({ chapter }) => <StatusBadge status={chapter.status} /> },
     {
       key: "actions",
       header: "Aksi",

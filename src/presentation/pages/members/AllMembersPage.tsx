@@ -12,16 +12,7 @@ import { FilterSelect, type FilterOption } from "@/presentation/components/ui/Fi
 import { MemberFormModal } from "@/presentation/components/members/MemberFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 import { MemberDetailModal } from "@/presentation/components/members/MemberDetailModal";
-
-const CHAPTER_OPTIONS: FilterOption[] = [
-  "All",
-  "Grow",
-  "Rise",
-  "Amplify",
-  "Glorify",
-  "Magnify",
-  "Garuda",
-].map((c) => ({ value: c, label: c }));
+import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
 
 const STATUS_OPTIONS: FilterOption[] = ["All", "Active", "Pending", "Overdue", "Expired"].map(
   (s) => ({ value: s, label: s === "All" ? "All Status" : s }),
@@ -31,7 +22,7 @@ export function AllMembersPage() {
   const { getMembers, listChapters, saveMember, deleteMember } = useServices();
 
   const [search, setSearch] = useState("");
-  const [chapter, setChapter] = useState("All");
+  const [chapter, setChapter] = useState(ALL);
   const [status, setStatus] = useState<MemberStatus | "All">("All");
   const [refresh, setRefresh] = useState(0);
   const bump = () => setRefresh((r) => r + 1);
@@ -51,6 +42,7 @@ export function AllMembersPage() {
     id: c.chapter.id,
     name: c.chapter.name,
   }));
+  const chapterSelectOptions = chapterFilterOptions(chapterOptions.map((c) => c.name));
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Member | null>(null);
@@ -119,7 +111,7 @@ export function AllMembersPage() {
           value={chapter}
           onChange={setChapter}
           ariaLabel="Filter by chapter"
-          options={CHAPTER_OPTIONS}
+          options={chapterSelectOptions}
         />
         <FilterSelect
           value={status}
@@ -136,10 +128,15 @@ export function AllMembersPage() {
       <MembersTable
         members={rows}
         extraColumns={[
-          { header: "Classification", render: (m) => m.classification },
+          {
+            header: "Classification",
+            render: (m) => m.classification,
+            sortValue: (m) => m.classification,
+          },
           {
             header: "Sponsor",
             render: (m) => (m.sponsorId ? sponsorName.get(m.sponsorId) ?? "—" : "—"),
+            sortValue: (m) => (m.sponsorId ? sponsorName.get(m.sponsorId) ?? "" : ""),
           },
         ]}
         renderActions={(m) => (

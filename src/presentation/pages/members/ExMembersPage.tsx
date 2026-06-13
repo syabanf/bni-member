@@ -5,16 +5,21 @@ import { PageHeader } from "@/presentation/components/ui/PageHeader";
 import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
 import { FilterBar } from "@/presentation/components/ui/FilterBar";
 import { SearchInput } from "@/presentation/components/ui/SearchInput";
+import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { MembersTable } from "@/presentation/components/members/MembersTable";
+import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
 
 export function ExMembersPage() {
   const { getMembersByStatus } = useServices();
   const { data } = useAsync(() => getMembersByStatus.execute(["Expired"]), []);
   const all = data ?? [];
   const [search, setSearch] = useState("");
+  const [chapter, setChapter] = useState(ALL);
   const q = search.toLowerCase();
   const rows = all.filter(
-    (m) => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q),
+    (m) =>
+      (chapter === ALL || m.chapter === chapter) &&
+      (m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)),
   );
 
   return (
@@ -36,6 +41,12 @@ export function ExMembersPage() {
           placeholder="Cari nama atau email..."
           ariaLabel="Cari member"
           className="flex-1"
+        />
+        <FilterSelect
+          value={chapter}
+          onChange={setChapter}
+          ariaLabel="Filter by chapter"
+          options={chapterFilterOptions(all.map((m) => m.chapter))}
         />
       </FilterBar>
 

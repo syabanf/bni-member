@@ -7,6 +7,8 @@ import { formatDate } from "@/presentation/utils/format";
 export interface MemberColumn {
   header: string;
   render: (member: Member) => ReactNode;
+  /** When set, the column header becomes sortable by this scalar. */
+  sortValue?: (member: Member) => string | number;
 }
 
 interface MembersTableProps {
@@ -38,6 +40,7 @@ export function MembersTable({
       key: "name",
       header: "Name",
       primary: true,
+      sortValue: (m) => m.name,
       cell: (m) => (
         <div className="flex items-center gap-3">
           <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium ${avatarClass}`}>
@@ -47,12 +50,17 @@ export function MembersTable({
         </div>
       ),
     },
-    { key: "email", header: "Email", cell: (m) => m.email },
-    { key: "chapter", header: "Chapter", cell: (m) => m.chapter },
-    { key: "joinDate", header: "Join Date", cell: (m) => formatDate(m.joinDate) },
-    { key: "status", header: "Status", cell: (m) => <StatusBadge status={m.status} /> },
+    { key: "email", header: "Email", sortValue: (m) => m.email, cell: (m) => m.email },
+    { key: "chapter", header: "Chapter", sortValue: (m) => m.chapter, cell: (m) => m.chapter },
+    { key: "joinDate", header: "Join Date", sortValue: (m) => m.joinDate, cell: (m) => formatDate(m.joinDate) },
+    { key: "status", header: "Status", sortValue: (m) => m.status, cell: (m) => <StatusBadge status={m.status} /> },
     ...extraColumns.map(
-      (c, i): Column<Member> => ({ key: `extra-${i}`, header: c.header, cell: c.render }),
+      (c, i): Column<Member> => ({
+        key: `extra-${i}`,
+        header: c.header,
+        cell: c.render,
+        sortValue: c.sortValue,
+      }),
     ),
     ...(renderActions
       ? [{ key: "actions", header: "Actions", actions: true, cell: renderActions } as Column<Member>]

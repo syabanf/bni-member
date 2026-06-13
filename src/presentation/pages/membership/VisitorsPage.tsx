@@ -14,6 +14,7 @@ import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { VisitorFormModal } from "@/presentation/components/membership/VisitorFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 import { formatDate } from "@/presentation/utils/format";
+import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
 
 const primaryBtn =
   "flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium";
@@ -47,10 +48,12 @@ export function VisitorsPage() {
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [chapterFilter, setChapterFilter] = useState(ALL);
   const ql = search.toLowerCase();
   const filtered = rows.filter(
     (r) =>
       (statusFilter === "All" || r.visitor.status === statusFilter) &&
+      (chapterFilter === ALL || r.chapterName === chapterFilter) &&
       (r.visitor.name.toLowerCase().includes(ql) ||
         r.visitor.profession.toLowerCase().includes(ql)),
   );
@@ -81,6 +84,7 @@ export function VisitorsPage() {
       key: "visitor",
       header: "Visitor",
       primary: true,
+      sortValue: ({ visitor }) => visitor.name,
       cell: ({ visitor }) => (
         <div>
           <p className="text-sm font-medium text-gray-900">{visitor.name}</p>
@@ -88,10 +92,10 @@ export function VisitorsPage() {
         </div>
       ),
     },
-    { key: "invitedBy", header: "Diundang oleh", cell: ({ inviterName }) => inviterName },
-    { key: "chapter", header: "Chapter", cell: ({ chapterName }) => chapterName },
-    { key: "date", header: "Tanggal", cell: ({ visitor }) => formatDate(visitor.visitDate) },
-    { key: "status", header: "Status", cell: ({ visitor }) => <StatusBadge status={visitor.status} /> },
+    { key: "invitedBy", header: "Diundang oleh", sortValue: ({ inviterName }) => inviterName, cell: ({ inviterName }) => inviterName },
+    { key: "chapter", header: "Chapter", sortValue: ({ chapterName }) => chapterName, cell: ({ chapterName }) => chapterName },
+    { key: "date", header: "Tanggal", sortValue: ({ visitor }) => visitor.visitDate, cell: ({ visitor }) => formatDate(visitor.visitDate) },
+    { key: "status", header: "Status", sortValue: ({ visitor }) => visitor.status, cell: ({ visitor }) => <StatusBadge status={visitor.status} /> },
     {
       key: "actions",
       header: "Aksi",
@@ -166,6 +170,12 @@ export function VisitorsPage() {
           onChange={setStatusFilter}
           ariaLabel="Filter status visitor"
           options={[{ value: "All", label: "Semua Status" }, ...VISITOR_STAGES.map((s) => ({ value: s, label: s }))]}
+        />
+        <FilterSelect
+          value={chapterFilter}
+          onChange={setChapterFilter}
+          ariaLabel="Filter by chapter"
+          options={chapterFilterOptions(chapterOptions.map((c) => c.name))}
         />
       </FilterBar>
 

@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
+import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 
 export interface Column<T> {
   key: string;
@@ -9,6 +10,11 @@ export interface Column<T> {
   /** Mobile: render in the actions row at the bottom (no label). */
   actions?: boolean;
   align?: "left" | "right";
+  /**
+   * When set, the column header becomes clickable to sort by the returned
+   * scalar. Clicking cycles ascending → descending → unsorted.
+   */
+  sortValue?: (row: T) => string | number | null | undefined;
 }
 
 interface DataTableProps<T> {
@@ -22,10 +28,25 @@ interface DataTableProps<T> {
   footer?: ReactNode;
 }
 
+type SortState = { key: string; dir: "asc" | "desc" } | null;
+
+/** Compare two sort values; null/empty always sort last, strings use locale + numeric. */
+function compareValues(a: string | number | null | undefined, b: string | number | null | undefined): number {
+  const na = a == null || a === "";
+  const nb = b == null || b === "";
+  if (na && nb) return 0;
+  if (na) return 1;
+  if (nb) return -1;
+  if (typeof a === "number" && typeof b === "number") return a - b;
+  return String(a).localeCompare(String(b), "id", { numeric: true });
+}
+
 /**
  * Standardised responsive table: a desktop table and auto-generated mobile
  * cards from the same column config. Header background, cell padding, row
  * dividers, hover, and empty state are consistent everywhere it is used.
+ *
+ * Columns that declare a `sortValue` get a clickable, sortable header.
  */
 export function DataTable<T>({
   columns,
@@ -35,6 +56,23 @@ export function DataTable<T>({
   header,
   footer,
 }: DataTableProps<T>) {
+  const [sort, setSort] = useState<SortState>(null);
+
+  const sortCol = sort ? columns.find((c) => c.key === sort.key) : undefined;
+  const sorted = useMemo(() => {
+    if (!sort || !sortCol?.sortValue) return rows;
+    const get = sortCol.sortValue;
+    const dir = sort.dir === "asc" ? 1 : -1;
+    return [...rows].sort((a, b) => compareValues(get(a), get(b)) * dir);
+  }, [rows, sort, sortCol]);
+
+  const toggleSort = (key: string) =>
+    setSort((cur) => {
+      if (!cur || cur.key !== key) return { key, dir: "asc" };
+      if (cur.dir === "asc") return { key, dir: "desc" };
+      return null;
+    });
+
   const primaryCols = columns.filter((c) => c.primary);
   const actionCols = columns.filter((c) => c.actions);
   const fieldCols = columns.filter((c) => !c.primary && !c.actions);
@@ -52,20 +90,46 @@ export function DataTable<T>({
             <table className="w-full">
               <thead className="bg-gray-50/70">
                 <tr>
-                  {columns.map((c) => (
-                    <th
-                      key={c.key}
-                      className={`px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap ${
-                        c.align === "right" ? "text-right" : "text-left"
-                      }`}
-                    >
-                      {c.header}
-                    </th>
-                  ))}
+                  {columns.map((c) => {
+                    const alignRight = c.align === "right";
+                    const active = sort?.key === c.key;
+                    return (
+                      <th
+                        key={c.key}
+                        className={`px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap ${
+                          alignRight ? "text-right" : "text-left"
+                        }`}
+                      >
+                        {c.sortValue ? (
+                          <button
+                            type="button"
+                            onClick={() => toggleSort(c.key)}
+                            aria-label={`Urutkan berdasarkan ${c.header}`}
+                            className={`group inline-flex items-center gap-1 transition-colors hover:text-gray-700 ${
+                              alignRight ? "flex-row-reverse" : ""
+                            } ${active ? "text-gray-700" : ""}`}
+                          >
+                            <span>{c.header}</span>
+                            {active ? (
+                              sort?.dir === "asc" ? (
+                                <ChevronUp className="w-3.5 h-3.5" />
+                              ) : (
+                                <ChevronDown className="w-3.5 h-3.5" />
+                              )
+                            ) : (
+                              <ChevronsUpDown className="w-3.5 h-3.5 text-gray-300 group-hover:text-gray-400" />
+                            )}
+                          </button>
+                        ) : (
+                          c.header
+                        )}
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {rows.map((row) => (
+                {sorted.map((row) => (
                   <tr key={rowKey(row)} className="hover:bg-gray-50/70 transition-colors">
                     {columns.map((c) => (
                       <td
@@ -85,7 +149,7 @@ export function DataTable<T>({
 
           {/* Mobile cards */}
           <div className="md:hidden divide-y divide-gray-100">
-            {rows.map((row) => (
+            {sorted.map((row) => (
               <div key={rowKey(row)} className="p-4">
                 {primaryCols.length > 0 && (
                   <div className="mb-3">

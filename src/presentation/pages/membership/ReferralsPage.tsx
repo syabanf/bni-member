@@ -15,6 +15,7 @@ import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { ReferralFormModal } from "@/presentation/components/membership/ReferralFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 import { formatCurrency, formatDate } from "@/presentation/utils/format";
+import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
 
 const primaryBtn =
   "flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium";
@@ -33,13 +34,16 @@ export function ReferralsPage() {
 
   const closed = rows.filter((r) => r.referral.status === "Closed");
   const tyfcbTotal = closed.reduce((s, r) => s + r.referral.tyfcb, 0);
+  const memberChapter = new Map(memberList.map((m) => [m.id, m.chapter]));
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [chapterFilter, setChapterFilter] = useState(ALL);
   const ql = search.toLowerCase();
   const filtered = rows.filter(
     (r) =>
       (statusFilter === "All" || r.referral.status === statusFilter) &&
+      (chapterFilter === ALL || memberChapter.get(r.referral.fromMemberId) === chapterFilter) &&
       (r.referral.description.toLowerCase().includes(ql) ||
         r.fromName.toLowerCase().includes(ql) ||
         r.toName.toLowerCase().includes(ql)),
@@ -71,6 +75,7 @@ export function ReferralsPage() {
       key: "ref",
       header: "Referral",
       primary: true,
+      sortValue: (r) => r.fromName,
       cell: ({ referral, fromName, toName }) => (
         <div>
           <p className="text-sm font-medium text-gray-900 flex items-center gap-1.5">
@@ -82,13 +87,14 @@ export function ReferralsPage() {
         </div>
       ),
     },
-    { key: "tier", header: "Tier", cell: ({ referral }) => (referral.tier === "Inside" ? "RGI" : "RGO") },
-    { key: "date", header: "Tanggal", cell: ({ referral }) => formatDate(referral.date) },
-    { key: "status", header: "Status", cell: ({ referral }) => <StatusBadge status={referral.status} /> },
+    { key: "tier", header: "Tier", sortValue: ({ referral }) => referral.tier, cell: ({ referral }) => (referral.tier === "Inside" ? "RGI" : "RGO") },
+    { key: "date", header: "Tanggal", sortValue: ({ referral }) => referral.date, cell: ({ referral }) => formatDate(referral.date) },
+    { key: "status", header: "Status", sortValue: ({ referral }) => referral.status, cell: ({ referral }) => <StatusBadge status={referral.status} /> },
     {
       key: "tyfcb",
       header: "TYFCB",
       align: "right",
+      sortValue: ({ referral }) => referral.tyfcb,
       cell: ({ referral }) =>
         referral.tyfcb > 0 ? (
           <span className="font-medium text-gray-900">{formatCurrency(referral.tyfcb)}</span>
@@ -170,6 +176,12 @@ export function ReferralsPage() {
             { value: "Closed", label: "Closed" },
             { value: "Cancelled", label: "Cancelled" },
           ]}
+        />
+        <FilterSelect
+          value={chapterFilter}
+          onChange={setChapterFilter}
+          ariaLabel="Filter by chapter"
+          options={chapterFilterOptions(memberList.map((m) => m.chapter))}
         />
       </FilterBar>
 

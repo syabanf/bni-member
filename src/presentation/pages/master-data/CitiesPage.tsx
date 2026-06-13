@@ -62,6 +62,7 @@ export function CitiesPage() {
       key: "name",
       header: "Kota",
       primary: true,
+      sortValue: ({ city }) => city.name,
       cell: ({ city }) => (
         <div>
           <p className="text-sm font-medium text-gray-900">{city.name}</p>
@@ -71,9 +72,9 @@ export function CitiesPage() {
         </div>
       ),
     },
-    { key: "chapters", header: "Chapter", cell: (c) => c.chapterCount },
-    { key: "members", header: "Member", cell: (c) => c.memberCount },
-    { key: "status", header: "Status", cell: ({ city }) => <StatusBadge status={city.status} /> },
+    { key: "chapters", header: "Chapter", sortValue: (c) => c.chapterCount, cell: (c) => c.chapterCount },
+    { key: "members", header: "Member", sortValue: (c) => c.memberCount, cell: (c) => c.memberCount },
+    { key: "status", header: "Status", sortValue: ({ city }) => city.status, cell: ({ city }) => <StatusBadge status={city.status} /> },
     {
       key: "actions",
       header: "Aksi",
