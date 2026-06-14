@@ -7,6 +7,7 @@ import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
 import { useToast } from "@/presentation/providers/ToastProvider";
 import { exportToCsv } from "@/presentation/utils/csv";
 import { formatCurrency } from "@/presentation/utils/format";
+import { countUniqueVisitors } from "@/presentation/utils/visitors";
 
 function BarRow({ label, value, max, display }: { label: string; value: number; max: number; display?: string }) {
   const pct = max > 0 ? Math.max(2, Math.round((value / max) * 100)) : 0;
@@ -67,6 +68,7 @@ export function ReportingPage() {
   // Visitor funnel
   const funnel = VISITOR_STAGES.map((stage) => ({ stage, n: vis.filter((v) => v.visitor.status === stage).length }));
   const maxFunnel = Math.max(1, ...funnel.map((x) => x.n));
+  const uniqueVisitors = countUniqueVisitors(vis.map((v) => v.visitor));
 
   // TYFCB per chapter (top 6)
   const tyfcbByChapter = new Map<string, number>();
@@ -129,7 +131,7 @@ export function ReportingPage() {
           ))}
         </ReportCard>
 
-        <ReportCard title="Funnel Visitor">
+        <ReportCard title={`Funnel Visitor · ${uniqueVisitors} unik (phone/email)`}>
           {funnel.map((x) => (
             <BarRow key={x.stage} label={x.stage} value={x.n} max={maxFunnel} />
           ))}

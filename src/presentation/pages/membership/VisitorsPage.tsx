@@ -5,6 +5,7 @@ import type { VisitorWithContext } from "@/application/dto/VisitorWithContext";
 import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHero } from "@/presentation/components/ui/PageHero";
+import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
 import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { IconButton } from "@/presentation/components/ui/IconButton";
@@ -15,6 +16,7 @@ import { VisitorFormModal } from "@/presentation/components/membership/VisitorFo
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 import { formatDate } from "@/presentation/utils/format";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
+import { countUniqueVisitors } from "@/presentation/utils/visitors";
 
 const primaryBtn =
   "flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium";
@@ -143,6 +145,24 @@ export function VisitorsPage() {
             </button>
           </>
         }
+      />
+
+      <SummaryCards
+        items={[
+          { iconName: "DoorOpen", value: rows.length, label: "Total Kunjungan", color: "blue" },
+          {
+            iconName: "UserCheck",
+            value: countUniqueVisitors(rows.map((r) => r.visitor)),
+            label: "Unique Visitor (phone/email)",
+            color: "green",
+          },
+          {
+            iconName: "Trophy",
+            value: rows.filter((r) => r.visitor.status === "Member").length,
+            label: "Jadi Member",
+            color: "amber",
+          },
+        ]}
       />
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">

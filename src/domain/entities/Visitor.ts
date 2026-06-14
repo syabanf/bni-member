@@ -20,9 +20,11 @@ export const VISITOR_STAGES: VisitorStatus[] = [
 export interface Visitor {
   id: string;
   name: string;
+  /** Profession / business type — checked against the chapter's filled seats. */
   profession: string;
   company?: string;
   email?: string;
+  phone?: string;
   /** Member who invited / hosted the visitor. */
   invitedById: string;
   /** Target chapter. */

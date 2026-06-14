@@ -9,6 +9,7 @@ export interface SaveVisitorInput {
   profession: string;
   company?: string;
   email?: string;
+  phone?: string;
   invitedById: string;
   chapterId: string;
   visitDate: string;

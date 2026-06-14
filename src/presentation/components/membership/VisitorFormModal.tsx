@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import type { Member } from "@/domain/entities/Member";
 import { VISITOR_STAGES, type Visitor, type VisitorStatus } from "@/domain/entities/Visitor";
 import type { SaveVisitorInput } from "@/application/use-cases/SaveVisitor";
@@ -35,6 +36,7 @@ export function VisitorFormModal({
   const [profession, setProfession] = useState("");
   const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [invitedById, setInvitedBy] = useState("");
   const [chapterId, setChapterId] = useState("");
   const [visitDate, setVisitDate] = useState(today());
@@ -48,6 +50,7 @@ export function VisitorFormModal({
     setProfession(initial?.profession ?? "");
     setCompany(initial?.company ?? "");
     setEmail(initial?.email ?? "");
+    setPhone(initial?.phone ?? "");
     setInvitedBy(initial?.invitedById ?? members[0]?.id ?? "");
     setChapterId(initial?.chapterId ?? chapters[0]?.id ?? "");
     setVisitDate(initial?.visitDate ?? today());
@@ -65,6 +68,7 @@ export function VisitorFormModal({
         profession: profession.trim(),
         company: company.trim() || undefined,
         email: email.trim() || undefined,
+        phone: phone.trim() || undefined,
         invitedById,
         chapterId,
         visitDate,
@@ -77,6 +81,16 @@ export function VisitorFormModal({
       setSubmitting(false);
     }
   };
+
+  const seatTakenBy = profession.trim()
+    ? members.find(
+        (m) =>
+          m.chapterId === chapterId &&
+          m.status === "Active" &&
+          m.classification.trim().toLowerCase() === profession.trim().toLowerCase(),
+      )
+    : undefined;
+  const chapterName = chapters.find((c) => c.id === chapterId)?.name ?? "chapter ini";
 
   return (
     <FormModal
@@ -91,10 +105,20 @@ export function VisitorFormModal({
         <FormField label="Nama" required>
           <input className={fieldInputClass} value={name} onChange={(e) => setName(e.target.value)} required />
         </FormField>
-        <FormField label="Profesi" required>
+        <FormField label="Profesi (tipe bisnis)" required>
           <input className={fieldInputClass} value={profession} onChange={(e) => setProfession(e.target.value)} required />
         </FormField>
       </div>
+
+      {seatTakenBy && (
+        <div className="flex items-start gap-2 rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            Kursi profesi <b>"{profession.trim()}"</b> di {chapterName} sudah terisi oleh{" "}
+            <b>{seatTakenBy.name}</b>. BNI hanya menerima 1 profesi per chapter.
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Perusahaan">
@@ -104,6 +128,16 @@ export function VisitorFormModal({
           <input type="email" className={fieldInputClass} value={email} onChange={(e) => setEmail(e.target.value)} />
         </FormField>
       </div>
+
+      <FormField label="No. WhatsApp">
+        <input
+          className={fieldInputClass}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="08xxxxxxxxxx"
+          inputMode="tel"
+        />
+      </FormField>
 
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Diundang oleh" required>
