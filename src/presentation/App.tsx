@@ -18,6 +18,10 @@ import { PaperIdPage } from "@/presentation/pages/integration/PaperIdPage";
 import { LarkPage } from "@/presentation/pages/integration/LarkPage";
 import { CitiesPage } from "@/presentation/pages/master-data/CitiesPage";
 import { ChaptersPage } from "@/presentation/pages/master-data/ChaptersPage";
+import { CityDetailPage } from "@/presentation/pages/master-data/CityDetailPage";
+import { ChapterDetailPage } from "@/presentation/pages/master-data/ChapterDetailPage";
+import { MemberDetailPage } from "@/presentation/pages/members/MemberDetailPage";
+import { ReportingPage } from "@/presentation/pages/reports/ReportingPage";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { user } = useAuth();
@@ -36,6 +40,7 @@ export function App() {
         }
       >
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/reports" element={<ReportingPage />} />
 
         <Route path="/payments/outstanding" element={<PaymentCategoryPage category="outstanding" />} />
         <Route path="/payments/awaiting" element={<PaymentCategoryPage category="awaiting" />} />
@@ -46,6 +51,7 @@ export function App() {
         <Route path="/members/new" element={<NewMembersPage />} />
         <Route path="/members/renewal" element={<NeedRenewalPage />} />
         <Route path="/members/ex" element={<ExMembersPage />} />
+        <Route path="/members/:memberId" element={<MemberDetailPage />} />
 
         <Route path="/subscriptions" element={<SubscriptionPage />} />
 
@@ -58,7 +64,9 @@ export function App() {
         <Route path="/integration/lark" element={<LarkPage />} />
 
         <Route path="/master-data/cities" element={<CitiesPage />} />
+        <Route path="/master-data/cities/:cityId" element={<CityDetailPage />} />
         <Route path="/master-data/chapters" element={<ChaptersPage />} />
+        <Route path="/master-data/chapters/:chapterId" element={<ChapterDetailPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Eye, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Pencil, Trash2, RefreshCw } from "lucide-react";
 import type { Chapter } from "@/domain/entities/Chapter";
 import type { ChapterWithStats } from "@/application/dto/ChapterWithStats";
 import { useServices } from "@/presentation/providers/ServicesProvider";
@@ -13,7 +14,6 @@ import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { IconButton } from "@/presentation/components/ui/IconButton";
 import { ChapterFormModal } from "@/presentation/components/master-data/ChapterFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
-import { ChapterDetailModal } from "@/presentation/components/master-data/ChapterDetailModal";
 
 const primaryBtn =
   "flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium";
@@ -22,6 +22,7 @@ const ghostBtn =
 
 export function ChaptersPage() {
   const { listChapters, saveChapter, deleteChapter, listCities } = useServices();
+  const navigate = useNavigate();
   const [refresh, setRefresh] = useState(0);
   const bump = () => setRefresh((r) => r + 1);
 
@@ -40,7 +41,6 @@ export function ChaptersPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Chapter | null>(null);
-  const [detailId, setDetailId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Chapter | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -88,10 +88,7 @@ export function ChaptersPage() {
       header: "Aksi",
       actions: true,
       cell: ({ chapter }) => (
-        <div className="flex items-center gap-1">
-          <IconButton label={`Detail ${chapter.name}`} onClick={() => setDetailId(chapter.id)}>
-            <Eye className="w-4 h-4" />
-          </IconButton>
+        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <IconButton
             label={`Edit ${chapter.name}`}
             onClick={() => {
@@ -162,6 +159,7 @@ export function ChaptersPage() {
         rows={filtered}
         rowKey={({ chapter }) => chapter.id}
         emptyText="Belum ada chapter"
+        onRowClick={({ chapter }) => navigate(`/master-data/chapters/${chapter.id}`)}
       />
 
       <ChapterFormModal
@@ -186,9 +184,6 @@ export function ChaptersPage() {
         }}
         onConfirm={handleDelete}
       />
-      {detailId && (
-        <ChapterDetailModal chapterId={detailId} onClose={() => setDetailId(null)} />
-      )}
     </div>
   );
 }

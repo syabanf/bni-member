@@ -21,13 +21,15 @@ export class GetCityDetail {
     ]);
 
     const chapterIds = new Set(chapters.map((c) => c.id));
+    const cityMembers = members.filter((m) => chapterIds.has(m.chapterId));
     return {
       city,
       chapters: chapters.map((chapter) => ({
         chapter,
         memberCount: members.filter((m) => m.chapterId === chapter.id).length,
       })),
-      memberCount: members.filter((m) => chapterIds.has(m.chapterId)).length,
+      members: cityMembers,
+      memberCount: cityMembers.length,
     };
   }
 }

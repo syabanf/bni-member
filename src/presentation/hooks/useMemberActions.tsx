@@ -1,11 +1,11 @@
 import { useState, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import type { Member, MemberStatus } from "@/domain/entities/Member";
 import type { SaveMemberInput } from "@/application/use-cases/SaveMember";
 import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { useToast } from "@/presentation/providers/ToastProvider";
 import { MemberFormModal } from "@/presentation/components/members/MemberFormModal";
-import { MemberDetailModal } from "@/presentation/components/members/MemberDetailModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
 
 const toInput = (m: Member): SaveMemberInput => ({
@@ -32,6 +32,7 @@ const toInput = (m: Member): SaveMemberInput => ({
 export function useMemberActions(onChanged: () => void) {
   const { saveMember, deleteMember, listChapters, getMembers } = useServices();
   const toast = useToast();
+  const navigate = useNavigate();
   const { data: chapterStats } = useAsync(() => listChapters.execute(), []);
   const { data: allMembers } = useAsync(() => getMembers.execute({}), []);
   const chapters = (chapterStats ?? []).map((c) => ({ id: c.chapter.id, name: c.chapter.name }));
@@ -39,7 +40,6 @@ export function useMemberActions(onChanged: () => void) {
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Member | null>(null);
-  const [detailId, setDetailId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -52,7 +52,7 @@ export function useMemberActions(onChanged: () => void) {
     setEditing(m);
     setFormOpen(true);
   };
-  const openDetail = (m: Member) => setDetailId(m.id);
+  const openDetail = (m: Member) => navigate(`/members/${m.id}`);
   const askDelete = (m: Member) => setDeleteTarget(m);
 
   /** Update a member's status (Approve / Restore / Renew) with toast feedback. */
@@ -108,7 +108,6 @@ export function useMemberActions(onChanged: () => void) {
         }}
         onConfirm={handleDelete}
       />
-      {detailId && <MemberDetailModal memberId={detailId} onClose={() => setDetailId(null)} />}
     </>
   );
 

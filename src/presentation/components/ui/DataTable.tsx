@@ -28,6 +28,8 @@ interface DataTableProps<T> {
   footer?: ReactNode;
   /** When set, rows are paginated client-side (after sorting) with a pager. */
   pageSize?: number;
+  /** When set, rows become clickable (cursor + hover) and call this on click. */
+  onRowClick?: (row: T) => void;
 }
 
 type SortState = { key: string; dir: "asc" | "desc" } | null;
@@ -58,6 +60,7 @@ export function DataTable<T>({
   header,
   footer,
   pageSize,
+  onRowClick,
 }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortState>(null);
   const [page, setPage] = useState(1);
@@ -138,7 +141,11 @@ export function DataTable<T>({
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {visible.map((row) => (
-                  <tr key={rowKey(row)} className="hover:bg-gray-50/70 transition-colors">
+                  <tr
+                    key={rowKey(row)}
+                    onClick={onRowClick ? () => onRowClick(row) : undefined}
+                    className={`hover:bg-gray-50/70 transition-colors ${onRowClick ? "cursor-pointer" : ""}`}
+                  >
                     {columns.map((c) => (
                       <td
                         key={c.key}
@@ -158,7 +165,11 @@ export function DataTable<T>({
           {/* Mobile cards */}
           <div className="md:hidden divide-y divide-gray-100">
             {visible.map((row) => (
-              <div key={rowKey(row)} className="p-4">
+              <div
+                key={rowKey(row)}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                className={`p-4 ${onRowClick ? "cursor-pointer active:bg-gray-50" : ""}`}
+              >
                 {primaryCols.length > 0 && (
                   <div className="mb-3">
                     {primaryCols.map((c) => (

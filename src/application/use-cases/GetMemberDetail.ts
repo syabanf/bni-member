@@ -27,6 +27,7 @@ export class GetMemberDetail {
       member,
       chapterName: chapter?.name ?? member.chapter,
       cityName: city?.name ?? "—",
+      cityId: city?.id ?? null,
       sponsor,
       sponsored: all.filter((m) => m.sponsorId === member.id),
       renewalDate: memberRenewalDate(member),

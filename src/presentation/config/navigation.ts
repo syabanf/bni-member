@@ -24,7 +24,10 @@ export interface NavSection {
 
 export const navigation: NavSection[] = [
   {
-    items: [{ label: "Dashboard", href: "/", iconName: "LayoutDashboard" }],
+    items: [
+      { label: "Dashboard", href: "/", iconName: "LayoutDashboard" },
+      { label: "Laporan", href: "/reports", iconName: "BarChart3" },
+    ],
   },
   {
     title: "Pembayaran",
@@ -94,5 +97,8 @@ export function getPageTitle(pathname: string): string {
       if (leaf) return leaf.label;
     }
   }
+  if (pathname.startsWith("/members/")) return "Detail Member";
+  if (pathname.startsWith("/master-data/cities/")) return "Detail Kota";
+  if (pathname.startsWith("/master-data/chapters/")) return "Detail Chapter";
   return "Dashboard";
 }

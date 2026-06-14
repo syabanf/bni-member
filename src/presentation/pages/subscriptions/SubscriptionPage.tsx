@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Download, FileText, Eye, Pencil } from "lucide-react";
 import type { Subscription } from "@/domain/entities/Subscription";
 import { useServices } from "@/presentation/providers/ServicesProvider";
@@ -15,14 +16,13 @@ import { formatCurrency, formatDate } from "@/presentation/utils/format";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
 import { exportToCsv } from "@/presentation/utils/csv";
 import { useToast } from "@/presentation/providers/ToastProvider";
-import { MemberDetailModal } from "@/presentation/components/members/MemberDetailModal";
 
 export function SubscriptionPage() {
   const { getSubscriptions, getMembers } = useServices();
   const toast = useToast();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [chapterFilter, setChapterFilter] = useState(ALL);
-  const [detailMemberId, setDetailMemberId] = useState<string | null>(null);
   const { data } = useAsync(() => getSubscriptions.execute(search), [search]);
   const { data: allSubs } = useAsync(() => getSubscriptions.execute(""), []);
   const { data: memberData } = useAsync(() => getMembers.execute({}), []);
@@ -75,7 +75,7 @@ export function SubscriptionPage() {
       actions: true,
       cell: (s) => (
         <div className="flex items-center gap-1">
-          <IconButton label="Lihat member" onClick={() => setDetailMemberId(s.memberId)}>
+          <IconButton label="Lihat member" onClick={() => navigate(`/members/${s.memberId}`)}>
             <Eye className="w-4 h-4" />
           </IconButton>
           <IconButton
@@ -141,10 +141,6 @@ export function SubscriptionPage() {
         rowKey={(s) => s.id}
         emptyText="No subscriptions found"
       />
-
-      {detailMemberId && (
-        <MemberDetailModal memberId={detailMemberId} onClose={() => setDetailMemberId(null)} />
-      )}
     </div>
   );
 }

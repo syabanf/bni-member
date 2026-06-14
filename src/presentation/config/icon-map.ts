@@ -21,6 +21,7 @@ import {
   DoorOpen,
   Trophy,
   MessageCircle,
+  BarChart3,
 } from "lucide-react";
 
 /** Icons are referenced by string name so config files stay serialisable. */
@@ -48,6 +49,7 @@ const iconMap = {
   DoorOpen,
   Trophy,
   MessageCircle,
+  BarChart3,
 } satisfies Record<string, IconComponent>;
 
 export type IconName = keyof typeof iconMap;

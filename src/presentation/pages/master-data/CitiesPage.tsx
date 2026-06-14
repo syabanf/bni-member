@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Eye, RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Pencil, Trash2, RefreshCw } from "lucide-react";
 import type { City } from "@/domain/entities/City";
 import type { CityWithStats } from "@/application/dto/CityWithStats";
 import { useServices } from "@/presentation/providers/ServicesProvider";
@@ -13,7 +14,6 @@ import { DataTable, type Column } from "@/presentation/components/ui/DataTable";
 import { IconButton } from "@/presentation/components/ui/IconButton";
 import { CityFormModal } from "@/presentation/components/master-data/CityFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
-import { CityDetailModal } from "@/presentation/components/master-data/CityDetailModal";
 
 const primaryBtn =
   "flex items-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2 rounded-lg text-sm font-medium";
@@ -22,6 +22,7 @@ const ghostBtn =
 
 export function CitiesPage() {
   const { listCities, saveCity, deleteCity } = useServices();
+  const navigate = useNavigate();
   const [refresh, setRefresh] = useState(0);
   const bump = () => setRefresh((r) => r + 1);
   const { data } = useAsync(() => listCities.execute(), [refresh]);
@@ -37,7 +38,6 @@ export function CitiesPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<City | null>(null);
-  const [detailId, setDetailId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<City | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -80,10 +80,7 @@ export function CitiesPage() {
       header: "Aksi",
       actions: true,
       cell: ({ city }) => (
-        <div className="flex items-center gap-1">
-          <IconButton label={`Detail ${city.name}`} onClick={() => setDetailId(city.id)}>
-            <Eye className="w-4 h-4" />
-          </IconButton>
+        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <IconButton
             label={`Edit ${city.name}`}
             onClick={() => {
@@ -150,6 +147,7 @@ export function CitiesPage() {
         rows={filtered}
         rowKey={({ city }) => city.id}
         emptyText="Belum ada kota"
+        onRowClick={({ city }) => navigate(`/master-data/cities/${city.id}`)}
       />
 
       <CityFormModal
@@ -173,7 +171,6 @@ export function CitiesPage() {
         }}
         onConfirm={handleDelete}
       />
-      {detailId && <CityDetailModal cityId={detailId} onClose={() => setDetailId(null)} />}
     </div>
   );
 }

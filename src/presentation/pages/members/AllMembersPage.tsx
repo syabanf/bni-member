@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Download } from "lucide-react";
 import type { Member, MemberStatus } from "@/domain/entities/Member";
 import { useServices } from "@/presentation/providers/ServicesProvider";
@@ -11,7 +12,6 @@ import { SearchInput } from "@/presentation/components/ui/SearchInput";
 import { FilterSelect, type FilterOption } from "@/presentation/components/ui/FilterSelect";
 import { MemberFormModal } from "@/presentation/components/members/MemberFormModal";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
-import { MemberDetailModal } from "@/presentation/components/members/MemberDetailModal";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
 import { exportToCsv } from "@/presentation/utils/csv";
 import { useToast } from "@/presentation/providers/ToastProvider";
@@ -23,6 +23,7 @@ const STATUS_OPTIONS: FilterOption[] = ["All", "Active", "Pending", "Overdue", "
 export function AllMembersPage() {
   const { getMembers, listChapters, saveMember, deleteMember } = useServices();
   const toast = useToast();
+  const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
   const [chapter, setChapter] = useState(ALL);
@@ -52,7 +53,6 @@ export function AllMembersPage() {
   const [deleteTarget, setDeleteTarget] = useState<Member | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [detailMemberId, setDetailMemberId] = useState<string | null>(null);
 
   const openCreate = () => {
     setEditing(null);
@@ -162,7 +162,7 @@ export function AllMembersPage() {
         renderActions={(m) => (
           <div className="flex gap-2">
             <button
-              onClick={() => setDetailMemberId(m.id)}
+              onClick={() => navigate(`/members/${m.id}`)}
               className="flex-1 md:flex-none px-3 py-1 text-xs border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
             >
               View
@@ -207,13 +207,6 @@ export function AllMembersPage() {
         }}
         onConfirm={handleDelete}
       />
-
-      {detailMemberId && (
-        <MemberDetailModal
-          memberId={detailMemberId}
-          onClose={() => setDetailMemberId(null)}
-        />
-      )}
     </div>
   );
 }

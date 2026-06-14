@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, Pencil, Trash2, ArrowUpRight, MessageCircle } from "lucide-react";
 import type { PaymentRecord } from "@/domain/entities/Payment";
 import { StatusBadge } from "@/presentation/components/ui/StatusBadge";
@@ -8,7 +8,6 @@ import { SearchInput } from "@/presentation/components/ui/SearchInput";
 import { FilterSelect } from "@/presentation/components/ui/FilterSelect";
 import { IconButton } from "@/presentation/components/ui/IconButton";
 import { ConfirmDeleteModal } from "@/presentation/components/ui/ConfirmDeleteModal";
-import { ViewMemberModal } from "./ViewMemberModal";
 import { formatDate, SHORT_DATE } from "@/presentation/utils/format";
 import { chapterFilterOptions, ALL } from "@/presentation/utils/filters";
 import { waLink } from "@/presentation/utils/whatsapp";
@@ -31,11 +30,10 @@ export function MemberTable({
 }: MemberTableProps) {
   const [search, setSearch] = useState("");
   const [chapter, setChapter] = useState(ALL);
-  const [selected, setSelected] = useState<PaymentRecord | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [removedIds, setRemovedIds] = useState<string[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<PaymentRecord | null>(null);
   const toast = useToast();
+  const navigate = useNavigate();
 
   const filtered = data.filter(
     (r) =>
@@ -51,11 +49,6 @@ export function MemberTable({
     setRemovedIds((ids) => [...ids, deleteTarget.id]);
     toast(`Data ${deleteTarget.memberName} dihapus`);
     setDeleteTarget(null);
-  };
-
-  const view = (record: PaymentRecord) => {
-    setSelected(record);
-    setIsOpen(true);
   };
 
   const columns: Column<PaymentRecord>[] = [
@@ -98,7 +91,7 @@ export function MemberTable({
               <MessageCircle className="w-4 h-4" />
             </a>
           )}
-          <IconButton label={`View ${r.memberName}`} onClick={() => view(r)}>
+          <IconButton label={`View ${r.memberName}`} onClick={() => navigate(`/members/${r.memberId}`)}>
             <Eye className="w-4 h-4" />
           </IconButton>
           <IconButton
@@ -157,14 +150,6 @@ export function MemberTable({
             Showing {filtered.length} of {data.length} records
           </span>
         }
-      />
-      <ViewMemberModal
-        data={selected}
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-          setSelected(null);
-        }}
       />
       <ConfirmDeleteModal
         isOpen={!!deleteTarget}
