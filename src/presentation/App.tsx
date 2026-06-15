@@ -9,7 +9,6 @@ import { AllMembersPage } from "@/presentation/pages/members/AllMembersPage";
 import { NewMembersPage } from "@/presentation/pages/members/NewMembersPage";
 import { NeedRenewalPage } from "@/presentation/pages/members/NeedRenewalPage";
 import { ExMembersPage } from "@/presentation/pages/members/ExMembersPage";
-import { SubscriptionPage } from "@/presentation/pages/subscriptions/SubscriptionPage";
 import { ReferralsPage } from "@/presentation/pages/membership/ReferralsPage";
 import { VisitorsPage } from "@/presentation/pages/membership/VisitorsPage";
 import { PerformancePage } from "@/presentation/pages/membership/PerformancePage";
@@ -52,8 +51,6 @@ export function App() {
         <Route path="/members/renewal" element={<NeedRenewalPage />} />
         <Route path="/members/ex" element={<ExMembersPage />} />
         <Route path="/members/:memberId" element={<MemberDetailPage />} />
-
-        <Route path="/subscriptions" element={<SubscriptionPage />} />
 
         <Route path="/membership/referrals" element={<ReferralsPage />} />
         <Route path="/membership/visitors" element={<VisitorsPage />} />

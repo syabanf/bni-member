@@ -1,5 +1,5 @@
 import { Download } from "lucide-react";
-import { VISITOR_STAGES } from "@/domain/entities/Visitor";
+import type { PaymentRecord } from "@/domain/entities/Payment";
 import { useServices } from "@/presentation/providers/ServicesProvider";
 import { useAsync } from "@/presentation/hooks/useAsync";
 import { PageHero } from "@/presentation/components/ui/PageHero";
@@ -7,9 +7,20 @@ import { SummaryCards } from "@/presentation/components/ui/SummaryCards";
 import { useToast } from "@/presentation/providers/ToastProvider";
 import { exportToCsv } from "@/presentation/utils/csv";
 import { formatCurrency } from "@/presentation/utils/format";
-import { countUniqueVisitors } from "@/presentation/utils/visitors";
 
-function BarRow({ label, value, max, display }: { label: string; value: number; max: number; display?: string }) {
+function BarRow({
+  label,
+  value,
+  max,
+  display,
+  barColor,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  display?: string;
+  barColor?: string;
+}) {
   const pct = max > 0 ? Math.max(2, Math.round((value / max) * 100)) : 0;
   return (
     <div>
@@ -18,7 +29,10 @@ function BarRow({ label, value, max, display }: { label: string; value: number; 
         <span className="font-medium text-gray-900 tabular-nums">{display ?? value}</span>
       </div>
       <div className="h-2 rounded-full bg-gray-100">
-        <div className="h-2 rounded-full bg-bni-primary" style={{ width: `${pct}%` }} />
+        <div
+          className={`h-2 rounded-full ${barColor ? "" : "bg-bni-primary"}`}
+          style={{ width: `${pct}%`, backgroundColor: barColor }}
+        />
       </div>
     </div>
   );
@@ -34,122 +48,92 @@ function ReportCard({ title, children }: { title: string; children: React.ReactN
 }
 
 export function ReportingPage() {
-  const { getMembers, listChapters, listCities, getMembershipLeaderboard, getSubscriptions, listVisitors } =
-    useServices();
+  const { getDashboardOverview, getPaymentsByCategory } = useServices();
   const toast = useToast();
 
-  const { data: members } = useAsync(() => getMembers.execute({}), []);
-  const { data: chapterStats } = useAsync(() => listChapters.execute(), []);
-  const { data: cityStats } = useAsync(() => listCities.execute(), []);
-  const { data: leaderboard } = useAsync(() => getMembershipLeaderboard.execute(), []);
-  const { data: subscriptions } = useAsync(() => getSubscriptions.execute(""), []);
-  const { data: visitors } = useAsync(() => listVisitors.execute(), []);
+  const { data: overview } = useAsync(() => getDashboardOverview.execute(50), []);
+  const { data: outstanding } = useAsync(() => getPaymentsByCategory.execute("outstanding"), []);
+  const { data: overdue } = useAsync(() => getPaymentsByCategory.execute("overdue"), []);
 
-  const memberList = members ?? [];
-  const chapters = chapterStats ?? [];
-  const board = leaderboard ?? [];
-  const subs = subscriptions ?? [];
-  const vis = visitors ?? [];
+  const summary = overview?.summary;
+  const distribution = overview?.distribution ?? [];
+  const maxDist = Math.max(1, ...distribution.map((d) => d.value));
 
-  const totalTyfcb = board.reduce((s, e) => s + e.tyfcb, 0);
-  const totalRevenue = subs.reduce((s, x) => s + x.amount, 0);
+  // Arrears = outstanding + overdue records (deduped by id).
+  const arrearsMap = new Map<string, PaymentRecord>();
+  [...(outstanding ?? []), ...(overdue ?? [])].forEach((r) => arrearsMap.set(r.id, r));
+  const arrears = Array.from(arrearsMap.values());
+  const totalArrears = arrears.reduce((s, r) => s + (r.amount ?? 0), 0);
 
-  // Members per chapter (sorted desc)
-  const perChapter = [...chapters]
-    .map((c) => ({ name: c.chapter.name, count: c.memberCount }))
-    .sort((a, b) => b.count - a.count);
-  const maxChapter = Math.max(1, ...perChapter.map((c) => c.count));
-
-  // Status breakdown
-  const statuses = ["Active", "Pending", "Overdue", "Expired"] as const;
-  const statusCounts = statuses.map((s) => ({ s, n: memberList.filter((m) => m.status === s).length }));
-  const maxStatus = Math.max(1, ...statusCounts.map((x) => x.n));
-
-  // Visitor funnel
-  const funnel = VISITOR_STAGES.map((stage) => ({ stage, n: vis.filter((v) => v.visitor.status === stage).length }));
-  const maxFunnel = Math.max(1, ...funnel.map((x) => x.n));
-  const uniqueVisitors = countUniqueVisitors(vis.map((v) => v.visitor));
-
-  // TYFCB per chapter (top 6)
-  const tyfcbByChapter = new Map<string, number>();
-  board.forEach((e) => tyfcbByChapter.set(e.member.chapter, (tyfcbByChapter.get(e.member.chapter) ?? 0) + e.tyfcb));
-  const tyfcbRows = Array.from(tyfcbByChapter.entries())
+  const byChapter = new Map<string, number>();
+  arrears.forEach((r) => byChapter.set(r.chapter, (byChapter.get(r.chapter) ?? 0) + (r.amount ?? 0)));
+  const chapterRows = Array.from(byChapter.entries())
     .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 6);
-  const maxTyfcb = Math.max(1, ...tyfcbRows.map((r) => r.value));
+    .sort((a, b) => b.value - a.value);
+  const maxChapter = Math.max(1, ...chapterRows.map((r) => r.value));
 
   const handleExport = () => {
-    exportToCsv("laporan-chapter.csv", chapters, [
-      { header: "Chapter", value: (c) => c.chapter.name },
-      { header: "Kota", value: (c) => c.cityName },
-      { header: "Member", value: (c) => c.memberCount },
-      { header: "Status", value: (c) => c.chapter.status },
-      { header: "TYFCB", value: (c) => tyfcbByChapter.get(c.chapter.name) ?? 0 },
+    exportToCsv("laporan-tunggakan.csv", arrears, [
+      { header: "Member", value: (r) => r.memberName },
+      { header: "Chapter", value: (r) => r.chapter },
+      { header: "Status", value: (r) => r.paymentStatus },
+      { header: "Nominal", value: (r) => r.amount ?? 0 },
+      { header: "Tanggal", value: (r) => r.date },
     ]);
-    toast("Laporan chapter diekspor ke CSV");
+    toast("Laporan tunggakan diekspor ke CSV");
   };
 
   return (
     <div className="space-y-6">
       <PageHero
         eyebrow="BNI Indonesia"
-        title="Laporan"
-        description="Ringkasan performa keanggotaan, distribusi member, funnel visitor, dan nilai bisnis (TYFCB)."
+        title="Laporan Pembayaran"
+        description="Ringkasan status pembayaran iuran: tagihan outstanding, awaiting, renewal, overdue, dan tunggakan per chapter."
         actions={
           <button
             onClick={handleExport}
             className="flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
           >
             <Download className="h-4 w-4" />
-            Export CSV
+            Export Tunggakan
           </button>
         }
       />
 
       <SummaryCards
         items={[
-          { iconName: "Users", value: memberList.length, label: "Total Member", color: "blue" },
-          { iconName: "Building2", value: chapters.length, label: "Total Chapter", color: "amber" },
-          { iconName: "MapPin", value: (cityStats ?? []).length, label: "Total Kota", color: "green" },
-          { iconName: "CreditCard", value: formatCurrency(totalTyfcb), label: "Total TYFCB", color: "red" },
+          { iconName: "CreditCard", value: summary?.outstanding ?? 0, label: "Outstanding", color: "red" },
+          { iconName: "Clock", value: summary?.awaiting ?? 0, label: "Awaiting", color: "amber" },
+          { iconName: "RefreshCw", value: summary?.renewal ?? 0, label: "Renewal Bulan Ini", color: "blue" },
+          { iconName: "AlertTriangle", value: summary?.overdue ?? 0, label: "Overdue", color: "red" },
         ]}
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ReportCard title="Member per Chapter">
-          {perChapter.length ? (
-            perChapter.map((c) => <BarRow key={c.name} label={c.name} value={c.count} max={maxChapter} />)
-          ) : (
-            <p className="text-sm text-gray-400">Belum ada data.</p>
-          )}
-        </ReportCard>
-
-        <ReportCard title="Status Member">
-          {statusCounts.map((x) => (
-            <BarRow key={x.s} label={x.s} value={x.n} max={maxStatus} />
-          ))}
-        </ReportCard>
-
-        <ReportCard title={`Funnel Visitor · ${uniqueVisitors} unik (phone/email)`}>
-          {funnel.map((x) => (
-            <BarRow key={x.stage} label={x.stage} value={x.n} max={maxFunnel} />
-          ))}
-        </ReportCard>
-
-        <ReportCard title="TYFCB per Chapter (Top 6)">
-          {tyfcbRows.length ? (
-            tyfcbRows.map((r) => (
-              <BarRow key={r.name} label={r.name} value={r.value} max={maxTyfcb} display={formatCurrency(r.value)} />
+        <ReportCard title="Distribusi Status Pembayaran">
+          {distribution.length ? (
+            distribution.map((d) => (
+              <BarRow key={d.name} label={d.name} value={d.value} max={maxDist} barColor={d.color} />
             ))
           ) : (
             <p className="text-sm text-gray-400">Belum ada data.</p>
           )}
         </ReportCard>
+
+        <ReportCard title={`Tunggakan per Chapter · ${formatCurrency(totalArrears)}`}>
+          {chapterRows.length ? (
+            chapterRows.map((r) => (
+              <BarRow key={r.name} label={r.name} value={r.value} max={maxChapter} display={formatCurrency(r.value)} />
+            ))
+          ) : (
+            <p className="text-sm text-gray-400">Tidak ada tunggakan 🎉</p>
+          )}
+        </ReportCard>
       </div>
 
       <p className="text-sm text-gray-500">
-        Total nilai langganan tercatat: <span className="font-semibold text-gray-900">{formatCurrency(totalRevenue)}</span>
+        Total tagihan tertunggak: <span className="font-semibold text-gray-900">{arrears.length}</span> · Nilai:{" "}
+        <span className="font-semibold text-gray-900">{formatCurrency(totalArrears)}</span>
       </p>
     </div>
   );

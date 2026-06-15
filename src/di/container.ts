@@ -1,6 +1,5 @@
 import { InMemoryMemberRepository } from "@/infrastructure/repositories/InMemoryMemberRepository";
 import { InMemoryPaymentRepository } from "@/infrastructure/repositories/InMemoryPaymentRepository";
-import { InMemorySubscriptionRepository } from "@/infrastructure/repositories/InMemorySubscriptionRepository";
 import { InMemoryImportRepository } from "@/infrastructure/repositories/InMemoryImportRepository";
 import { InMemoryCityRepository } from "@/infrastructure/repositories/InMemoryCityRepository";
 import { InMemoryChapterRepository } from "@/infrastructure/repositories/InMemoryChapterRepository";
@@ -16,7 +15,6 @@ import { GetPaymentsByCategory } from "@/application/use-cases/GetPaymentsByCate
 import { SendBulkNotifications } from "@/application/use-cases/SendBulkNotifications";
 import { GetMembers } from "@/application/use-cases/GetMembers";
 import { GetMembersByStatus } from "@/application/use-cases/GetMembersByStatus";
-import { GetSubscriptions } from "@/application/use-cases/GetSubscriptions";
 import { GetImportPreview } from "@/application/use-cases/GetImportPreview";
 import { ListCities } from "@/application/use-cases/ListCities";
 import { SaveCity } from "@/application/use-cases/SaveCity";
@@ -57,8 +55,7 @@ export interface Services {
   saveMember: SaveMember;
   deleteMember: DeleteMember;
   getMemberDetail: GetMemberDetail;
-  // Subscriptions & import
-  getSubscriptions: GetSubscriptions;
+  // Import
   getImportPreview: GetImportPreview;
   // Master data CRUD — cities & chapters
   listCities: ListCities;
@@ -95,7 +92,6 @@ export function createServices(): Services {
   // Infrastructure (adapters / driven side)
   const memberRepo = new InMemoryMemberRepository();
   const paymentRepo = new InMemoryPaymentRepository();
-  const subscriptionRepo = new InMemorySubscriptionRepository();
   const importRepo = new InMemoryImportRepository();
   const cityRepo = new InMemoryCityRepository();
   const chapterRepo = new InMemoryChapterRepository();
@@ -118,7 +114,6 @@ export function createServices(): Services {
     deleteMember: new DeleteMember(memberRepo),
     getMemberDetail: new GetMemberDetail(memberRepo, chapterRepo, cityRepo),
 
-    getSubscriptions: new GetSubscriptions(subscriptionRepo),
     getImportPreview: new GetImportPreview(importRepo),
 
     listCities: new ListCities(cityRepo, chapterRepo, memberRepo),

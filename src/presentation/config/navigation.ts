@@ -32,16 +32,10 @@ export const navigation: NavSection[] = [
   {
     title: "Pembayaran",
     items: [
-      {
-        label: "Payment",
-        iconName: "CreditCard",
-        children: [
-          { label: "Outstanding Payment", href: "/payments/outstanding", iconName: "CreditCard" },
-          { label: "Awaiting Payment", href: "/payments/awaiting", iconName: "Clock" },
-          { label: "Renewal", href: "/payments/renewal", iconName: "RefreshCw" },
-          { label: "Overdue Payment", href: "/payments/overdue", iconName: "AlertTriangle", badge: 7 },
-        ],
-      },
+      { label: "Outstanding", href: "/payments/outstanding", iconName: "CreditCard" },
+      { label: "Awaiting", href: "/payments/awaiting", iconName: "Clock" },
+      { label: "Renewal", href: "/payments/renewal", iconName: "RefreshCw" },
+      { label: "Overdue", href: "/payments/overdue", iconName: "AlertTriangle", badge: 7 },
     ],
   },
   {
@@ -57,7 +51,6 @@ export const navigation: NavSection[] = [
           { label: "Ex-Member", href: "/members/ex", iconName: "UserMinus" },
         ],
       },
-      { label: "Subscription Data", href: "/subscriptions", iconName: "FileText" },
       { label: "Referral", href: "/membership/referrals", iconName: "Share2" },
       { label: "Visitor", href: "/membership/visitors", iconName: "DoorOpen" },
       { label: "Performa", href: "/membership/performance", iconName: "Trophy" },
@@ -75,15 +68,9 @@ export const navigation: NavSection[] = [
     title: "Integrasi",
     adminOnly: true,
     items: [
-      {
-        label: "Data Integration",
-        iconName: "Link2",
-        children: [
-          { label: "Export / Import", href: "/integration/import", iconName: "FileText" },
-          { label: "Paper.id", href: "/integration/paper-id", iconName: "Database" },
-          { label: "Lark (Feishu)", href: "/integration/lark", iconName: "Link2" },
-        ],
-      },
+      { label: "Export / Import", href: "/integration/import", iconName: "FileText" },
+      { label: "Paper.id", href: "/integration/paper-id", iconName: "Database" },
+      { label: "Lark (Feishu)", href: "/integration/lark", iconName: "Link2" },
     ],
   },
 ];
