@@ -1,22 +1,15 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
-import { Mail, Lock, LogIn } from "lucide-react";
+import { Mail, Lock, ArrowRight, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/presentation/auth/AuthProvider";
 
-const DEMO_ACCOUNTS = [
-  { email: "admin@bni.id", label: "National Admin" },
-  { email: "ahmad@bni.id", label: "President · Garuda" },
-  { email: "budi@bni.id", label: "VP · Amplify" },
-  { email: "rina@bni.id", label: "Member · Garuda" },
-];
-
 const inputClass =
-  "w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-bni-primary/20";
+  "w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-bni-primary/25 focus:border-bni-primary/40";
 
 export function LoginPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@bni.id");
+  const [email, setEmail] = useState("admin@bni-finance.com");
   const [password, setPassword] = useState("password");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -30,35 +23,64 @@ export function LoginPage() {
     const ok = await login(email, password);
     setSubmitting(false);
     if (ok) navigate("/", { replace: true });
-    else setError("Email atau password salah");
+    else setError("Gagal masuk, coba lagi.");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-card border border-gray-100/80 p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-11 h-11 rounded-xl bg-bni-primary flex items-center justify-center text-white text-xl font-bold shadow-glow">
+    <div className="grid min-h-screen lg:grid-cols-2">
+      {/* Brand panel */}
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-brand-gradient p-10 text-white lg:flex">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-white/10 blur-3xl"
+        />
+        <div className="relative flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 text-xl font-bold backdrop-blur">
+            B
+          </div>
+          <div className="leading-tight">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-white/80">BNI Indonesia</p>
+            <p className="text-lg font-bold">Finance Hub</p>
+          </div>
+        </div>
+
+        <div className="relative max-w-md">
+          <h1 className="text-4xl font-bold leading-tight tracking-tight">
+            Kelola invoice &amp; pembayaran keanggotaan dalam satu tempat.
+          </h1>
+          <p className="mt-4 text-sm leading-relaxed text-white/80">
+            Sistem finance terpadu untuk BNI Grow Chapter Management — pendaftaran, renewal, dan
+            rekonsiliasi pembayaran via Paper.id.
+          </p>
+        </div>
+
+        <div className="relative flex items-center gap-2 text-xs text-white/70">
+          <ShieldCheck className="h-4 w-4" />
+          Akses khusus National Admin · Terenkripsi
+        </div>
+      </div>
+
+      {/* Form panel */}
+      <div className="flex items-center justify-center bg-white p-6 sm:p-10">
+        <div className="w-full max-w-sm">
+          <div className="mb-8 flex items-center gap-3 lg:hidden">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-gradient text-xl font-bold text-white shadow-glow">
               B
             </div>
             <div className="leading-tight">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-bni-primary">
-                BNI Indonesia
-              </p>
-              <p className="text-lg font-bold text-gray-900">Payment Hub</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-bni-primary">BNI Indonesia</p>
+              <p className="text-lg font-bold text-gray-900">Finance Hub</p>
             </div>
           </div>
 
-          <h1 className="text-xl font-bold text-gray-900">Masuk</h1>
-          <p className="text-sm text-gray-500 mt-1 mb-6">
-            Silakan login untuk mengakses dashboard.
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900">Selamat datang kembali</h2>
+          <p className="mt-1 text-sm text-gray-500">Masuk untuk melanjutkan ke Finance Hub.</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <label className="block">
-              <span className="block text-xs font-medium text-gray-600 mb-1">Email</span>
+              <span className="mb-1 block text-sm font-medium text-gray-700">Email</span>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   type="email"
                   value={email}
@@ -68,10 +90,11 @@ export function LoginPage() {
                 />
               </div>
             </label>
+
             <label className="block">
-              <span className="block text-xs font-medium text-gray-600 mb-1">Password</span>
+              <span className="mb-1 block text-sm font-medium text-gray-700">Password</span>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   type="password"
                   value={password}
@@ -82,39 +105,21 @@ export function LoginPage() {
               </div>
             </label>
 
-            {error && (
-              <p className="text-sm text-danger bg-danger/10 rounded-lg px-3 py-2">{error}</p>
-            )}
+            {error && <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">{error}</p>}
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full flex items-center justify-center gap-2 bg-bni-primary hover:bg-bni-dark text-white px-4 py-2.5 rounded-lg text-sm font-medium disabled:opacity-70"
+              className="group flex w-full items-center justify-center gap-2 rounded-lg bg-bni-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-bni-dark disabled:opacity-70"
             >
-              <LogIn className="w-4 h-4" />
               {submitting ? "Memproses..." : "Masuk"}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-gray-100">
-            <p className="text-xs text-gray-400 mb-2">
-              Akun demo (password: <code className="text-gray-500">password</code>):
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {DEMO_ACCOUNTS.map((d) => (
-                <button
-                  key={d.email}
-                  type="button"
-                  onClick={() => {
-                    setEmail(d.email);
-                    setPassword("password");
-                  }}
-                  className="text-xs px-2.5 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
-                >
-                  {d.label}
-                </button>
-              ))}
-            </div>
+          <div className="mt-6 rounded-lg border border-dashed border-gray-200 px-4 py-3 text-xs text-gray-500">
+            <span className="font-semibold text-gray-700">Demo:</span> gunakan kredensial apa pun — data
+            berjalan di atas mock repository.
           </div>
         </div>
       </div>
